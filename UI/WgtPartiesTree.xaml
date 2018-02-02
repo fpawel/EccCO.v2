@@ -1,0 +1,320 @@
+﻿<UserControl x:Class="UI.WgtPartiesTree"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI;assembly="
+             mc:Ignorable="d" Margin="0"           
+             BorderThickness="1"
+             BorderBrush="White"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>        
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <local:Col1WidthConverter x:Key="Col1WidthConverter" />
+            <local:Col1WidthConverter2 x:Key="Col1WidthConverter2" />
+
+            <Canvas x:Key="appbar_check_green" Width="76" Height="76" Clip="F1 M 0,0L 76,0L 76,76L 0,76L 0,0">
+                <Path Fill="{StaticResource MyGreenOnGreyBlack}" Width="37.9998" Height="31.6665" Canvas.Left="19.0001" Canvas.Top="22.1668" Stretch="Fill"                       
+                      Data="F1 M 23.7501,33.25L 34.8334,44.3333L 52.2499,22.1668L 56.9999,26.9168L 34.8334,53.8333L 19.0001,38L 23.7501,33.25 Z "/>
+            </Canvas>
+
+            <Canvas x:Key="appbar_folder_green" Width="76" Height="76" Clip="F1 M 0,0L 76,0L 76,76L 0,76L 0,0">
+                <Path Fill="{StaticResource MyGreenOnGreyBlack}"  Width="34.9999" Height="26" Canvas.Left="21" Canvas.Top="24" Stretch="Fill"                       
+                      Data="F1 M 21,30.0001L 55.9999,30.0001L 55.9999,50L 21,50L 21,30.0001 Z M 52,28L 37,28C 38,25 39.4999,24.0001 39.4999,24.0001L 50.75,24C 51.3023,24 52,24.6977 52,25.25L 52,28 Z "/>
+            </Canvas>
+            <Canvas x:Key="appbar_folder_open_green" Width="76" Height="76" Clip="F1 M 0,0L 76,0L 76,76L 0,76L 0,0">
+                <Path Fill="{StaticResource MyGreenOnGreyBlack}" Width="44" Height="26" Canvas.Left="19" Canvas.Top="24" Stretch="Fill" 
+                      Data="F1 M 19,50L 28,34L 63,34L 54,50L 19,50 Z M 19,28.0001L 35,28C 36,25 37.4999,24.0001 37.4999,24.0001L 48.75,24C 49.3023,24 50,24.6977 50,25.25L 50,28L 53.9999,28.0001L 53.9999,32L 27,32L 19,46.4L 19,28.0001 Z "/>
+            </Canvas>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <GroupBox Margin="0" Padding="0" >
+            <GroupBox.Header>
+                <TextBlock Text="Обзор сохранённых партий" Margin="5" />
+            </GroupBox.Header>
+            <Grid >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                
+                
+                
+                <Expander>
+                    <Expander.Header>
+                        <TextBlock Text="Фильтр" Foreground="Aqua" />
+                    </Expander.Header>
+                    <StackPanel TextElement.Foreground="{StaticResource MyGreenOnGreyBlack}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="ЭХЯ №" Margin="3" VerticalAlignment="Center" Width="100" />
+                            <TextBox Margin="3" VerticalAlignment="Center" Width="150"
+                                     ToolTip="Фильтрация партий по наличию ЭХЯ с заданным серийным номером"
+                                     Text="{Binding [CurentPartyInfo].ProductSerialFilter, Mode=TwoWay, Converter={StaticResource FSharpIntOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                            
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Исполнение" Margin="3" VerticalAlignment="Center" Width="100" />
+                            <ComboBox Margin="3" VerticalAlignment="Center" Width="150"
+                                      ToolTip="Фильтрация партий по исполнению"
+                                      ItemsSource="{Binding [ProductTypes1]}" 
+                                      DisplayMemberPath="ProductType.Name" FontSize="14"
+                                      SelectedValuePath="ProductType.Name"
+                                      SelectedValue="{Binding [CurentPartyInfo].ProductTypeFilter, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                    </StackPanel>
+                    
+
+                </Expander>
+                
+                <TreeView x:Name="TreeView"  VerticalAlignment="Stretch" Grid.Row="1" BorderThickness="0" Padding="5"
+                          ItemsSource="{Binding [RepositoryTree], Mode=OneWay}" >
+                    <TreeView.Template>
+                        <ControlTemplate TargetType="TreeView">
+                            <ScrollViewer Background="{StaticResource GreyBlackBackground}" >
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <Grid x:Name="HeaderGrid">
+                                        <Grid.Resources>
+                                            <Style TargetType="GridViewColumnHeader" BasedOn="{StaticResource MetroGridViewColumnHeader}">
+                                                <Setter Property="MinWidth" Value="80" />
+                                                <Setter Property="Margin" Value="1"/>
+                                            </Style>
+                                        </Grid.Resources>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <GridViewColumnHeader Grid.Column="0" x:Name="TitleHeader" Width="220"   Content="Партия" 
+                                                              Foreground="{StaticResource MyColumnHeaderForeground}"/>
+                                        <GridViewColumnHeader Content="Исполнение" Grid.Column="1" x:Name="ProductTypeTimeHeader" 
+                                                              Foreground="{StaticResource MyColumnHeaderForeground}"/>
+                                        <GridViewColumnHeader Content="" Grid.Column="2" x:Name="ToolButtonHeader"  
+                                                              Foreground="{StaticResource MyColumnHeaderForeground}"/>
+                                        <Rectangle Grid.Column="3" x:Name="EmptyHeader" />
+                                    </Grid>
+
+                                    <ItemsPresenter x:Name="ItemsHost" Grid.Row="1"
+                                                Width="{Binding ElementName=HeaderGrid, Path=ActualWidth}" />
+                                </Grid>
+
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </TreeView.Template>
+                    <TreeView.Resources>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource MetroTextBlock}">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="Margin" Value="3,0" />
+                            
+                        </Style>
+
+                        <HierarchicalDataTemplate DataType="{x:Type local:PartyTreeViewModel}" ItemsSource="{Binding Items}" >
+                            <Grid HorizontalAlignment="Stretch" MinHeight="32"  TextElement.Foreground="{StaticResource MidleAqua}">
+                                <Grid.Resources>
+                                    <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MetroTextBlock}">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                        <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasSelectedParty}" Value="true">
+                                                <Setter Property="Foreground" Value="{StaticResource MyGreenOnGreyBlack}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Resources>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Orientation="Horizontal">
+                                    <StackPanel.Width>
+                                        <!--Width="{Binding ElementName=TitleHeader, Path=ActualWidth, Converter={StaticResource Col1WidthConverter}}"-->
+                                        <MultiBinding Converter="{StaticResource Col1WidthConverter2}">
+                                            <Binding Path="ActualWidth" ElementName="TitleHeader" Converter="{StaticResource Col1WidthConverter}"/>
+                                            <Binding Path="Level" />
+                                        </MultiBinding>
+                                    </StackPanel.Width>
+
+                                    <StackPanel Margin="5,0" Orientation="Horizontal">
+                                        <StackPanel Visibility="{Binding IsCatalogueItem, Converter={StaticResource BooleanToVisibilityConverter}}" Orientation="Horizontal">
+                                            <StackPanel Orientation="Horizontal" Visibility="{Binding IsExpanded, Converter={StaticResource ShowIfFalseConverter}}">
+                                                <Rectangle Width="15" Height="10" Margin="3,0" 
+                                                           Visibility="{Binding HasSelectedParty, Converter={StaticResource BooleanToVisibilityConverter}}" >
+                                                    <Rectangle.Fill>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder_green}" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+
+                                                <Rectangle Width="15" Height="10" Margin="3,0" 
+                                                           Visibility="{Binding HasSelectedParty, Converter={StaticResource ShowIfFalseConverter}}" >
+                                                    <Rectangle.Fill>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder}" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                                                <Rectangle Width="15" Height="10" Margin="3,0" 
+                                                           Visibility="{Binding HasSelectedParty, Converter={StaticResource BooleanToVisibilityConverter}}" >
+                                                    <Rectangle.Fill>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder_open_green}" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+
+                                                <Rectangle Width="15" Height="10" Margin="3,0" 
+                                                           Visibility="{Binding HasSelectedParty, Converter={StaticResource ShowIfFalseConverter}}" >
+                                                    <Rectangle.Fill>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder_open}" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+
+                                            </StackPanel>
+
+                                        </StackPanel>
+
+                                        <StackPanel Visibility="{Binding IsCatalogueItem, Converter={StaticResource ShowIfFalseConverter}}" Orientation="Horizontal">
+
+                                            <Rectangle Width="15" Height="10" Margin="3,0" 
+                                                       Visibility="{Binding HasSelectedParty, Converter={StaticResource ShowIfFalseConverter}}" >
+                                                <Rectangle.Fill>
+                                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_book}" />
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+
+                                            <Rectangle Width="15" Height="10" Margin="3,0" 
+                                                       Visibility="{Binding HasSelectedParty, Converter={StaticResource BooleanToVisibilityConverter}}" >
+                                                <Rectangle.Fill>
+                                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_check_green}" />
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Name }" TextWrapping="NoWrap" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="{Binding ProductType }" Margin="5,0"
+                                       FontSize="16"
+                                       Width="{Binding ElementName=ProductTypeTimeHeader, Path=ActualWidth}"/>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0" 
+                                            Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                            MinWidth="50"
+                                            Width="{Binding ElementName=ToolButtonHeader, Path=ActualWidth}">
+
+                                    <Button Command="{Binding Select}"
+                                            VerticalAlignment="Center" Margin="3,0" 
+                                            ToolTip="Выбрать партию в качестве рабочей" 
+                                            Visibility="{Binding IsBatchInfoItem, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <Rectangle Width="10" Height="10">
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_check}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                    </Button>
+                                    <Button Command="{Binding Delete}" VerticalAlignment="Center" Margin="3,0" Click="Button_Click"  >
+                                        <Button.ToolTip>
+                                            <ToolTip>
+                                                <WrapPanel>
+                                                    <TextBlock Text="Удалить" Margin="0,0,3,0" />
+                                                    <TextBlock Text="{Binding What}" Foreground="{StaticResource MyGreenOnGreyBlack}" FontWeight="Bold"/>
+                                                </WrapPanel>
+                                            </ToolTip>
+                                        </Button.ToolTip>
+                                        <Rectangle Width="10" Height="10">
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+
+                        </HierarchicalDataTemplate>
+                    </TreeView.Resources>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem" BasedOn="{StaticResource MetroTreeViewItem}">
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Header.IsVisible, RelativeSource={RelativeSource Self}  }" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+
+                            </Style.Triggers>
+
+
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+                <!--<localView:ConfirmationPopupWidget x:Name="ConfirmationPopupWidget" />-->
+            </Grid>
+        </GroupBox>
+
+        <!--диалог подтверждения удаления данных-->
+        <Popup StaysOpen="False" PopupAnimation="Fade" Placement="Bottom"
+                   DataContext="{Binding [CurentPartyInfo].PromptConfirmDelete}" 
+                   x:Name="PopupConfirmDelete" >
+            <Border Background="{StaticResource GreyBlackBackground}">
+                <GroupBox Header="Удаление данных" Padding="10" MinHeight="50" 
+                      VerticalAlignment="Center" HorizontalAlignment="Center" >
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel TextElement.FontSize="20">
+                            <TextBlock Text="Пожалуйста, подтвердите необходимость удаления данных" Margin="5" 
+                                       HorizontalAlignment="Left"
+                                       Foreground="{StaticResource MidleAqua}" />
+                            <TextBlock Text="{Binding Text}" MaxWidth="300"  TextWrapping="WrapWithOverflow"
+                                       Margin="5" HorizontalAlignment="Left"
+                                       Foreground="{StaticResource MyGreenOnGreyBlack}"/>
+                        </StackPanel>
+
+                        <Button Background="{DynamicResource AccentColorBrush}" 
+                                Margin="10" VerticalAlignment="Top" Command="{Binding Accept}" Click="Button_Click_2">
+                            <Button.ToolTip>
+                                <StackPanel TextElement.FontSize="18">
+                                    <TextBlock Text="Нажмите эту кнопку, если ДЕЙСТВИТЕЛЬНО необходимо удалить данные" Foreground="Aqua" HorizontalAlignment="Left" />
+                                    <TextBlock Text="{Binding Text}" Foreground="{StaticResource MyGreenOnGreyBlack}" HorizontalAlignment="Left"  />
+                                </StackPanel>
+                            </Button.ToolTip>
+                            <Rectangle Width="20" Height="20">
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_check}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+
+                        <Button Background="{DynamicResource AccentColorBrush}"
+                                    Margin="10" VerticalAlignment="Top" Click="Button_Click_2">
+                            <Button.ToolTip>
+                                <StackPanel TextElement.FontSize="18">
+                                    <TextBlock Text="Нажмите эту кнопку, если Вам не нужно удалять данные" Foreground="Aqua" HorizontalAlignment="Left"  />
+                                    <TextBlock Text="{Binding Text}" Foreground="{StaticResource MyGreenOnGreyBlack}" HorizontalAlignment="Left" />
+                                </StackPanel>
+                            </Button.ToolTip>
+                            <Rectangle Width="20" Height="20">
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+
+                    </StackPanel>
+
+                </GroupBox>
+
+            </Border>
+
+        </Popup>
+
+    </Grid>
+    
+    
+</UserControl>

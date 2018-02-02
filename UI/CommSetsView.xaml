@@ -1,0 +1,118 @@
+﻿<UserControl x:Class="UI.CommSetsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" TextElement.FontSize="16"
+             x:Name="commSetsViewInstance"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource PopupTextBlock}" />
+            <Style TargetType="CheckBox" BasedOn="{StaticResource PopupCheckBox}" />
+            <Style TargetType="TextBox" BasedOn="{StaticResource PopupTextBox}" />
+            <Style TargetType="ComboBox" BasedOn="{StaticResource PopupComboBox}" />
+            
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <WrapPanel>
+        
+        <TextBlock Text="{Binding Title, ElementName=commSetsViewInstance}" VerticalAlignment="Center" 
+                   TextAlignment="Right"
+                   Width="{Binding TitleWidth, ElementName=commSetsViewInstance}"
+                   Foreground="SkyBlue" FontSize="16"/>
+
+        <Button ToolTip="Настройки приёмо-передачи" Click="Button_Click_29" BorderBrush="{StaticResource MyGreenOnGreyBlack}"
+                Margin="3"  VerticalAlignment="Center">
+            <ContentControl>
+                <Rectangle Width="25" Height="25">
+                    <Rectangle.Fill>
+                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_connect}" />
+                    </Rectangle.Fill>
+                </Rectangle>
+            </ContentControl>
+        </Button>
+        <ComboBox ItemsSource="{Binding SerialPortsNames, ElementName=commSetsViewInstance}" HorizontalAlignment="Right"
+                  Text="{Binding PortName}" TextElement.FontSize="16" IsEditable="True" IsReadOnly="True" StaysOpenOnEdit="True"
+                  Margin="3" Width="100" DropDownOpened="ComboBox_DropDownOpened"                   
+                  Visibility="{Binding IsSelectPortNamecomboBoxVisible, ElementName=commSetsViewInstance, 
+            Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+        <Popup StaysOpen="False" PopupAnimation="Fade" Margin="5" x:Name="PopupSettings" TextElement.FontSize="16" AllowsTransparency="True">
+            <Grid TextElement.FontSize="16" Background="{StaticResource GreyBlackBackground}" >
+                <GroupBox Padding="3" TextElement.FontSize="16" Header="{Binding Title, ElementName=commSetsViewInstance}" >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />                            
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" Visibility="{Binding IsAddyTextBoxVisible, ElementName=commSetsViewInstance, 
+                            Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Адрес MODBUS
+                        </TextBlock>
+                        <TextBlock Grid.Row="1">
+                            Скорость передачи данных, бод
+                        </TextBlock>
+                        <TextBlock Grid.Row="2">
+                            Таймаут, мс
+                        </TextBlock>
+                        <TextBlock Grid.Row="3">
+                            Задержка отправки, мс
+                        </TextBlock>
+                        <TextBlock Grid.Row="4" >
+                            Время ожидания символа, мс
+                        </TextBlock>
+                        <TextBlock Grid.Row="5" >
+                            Количество повторов запроса
+                        </TextBlock>
+                        <TextBlock Grid.Row="6">
+                            Показывать посылки
+                        </TextBlock>
+                        
+                        <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding Addy, Mode=TwoWay}"  
+                                 Visibility="{Binding IsAddyTextBoxVisible, ElementName=commSetsViewInstance, 
+                            Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 MouseWheel="TextBox_MouseWheel" />
+                        <ComboBox Grid.Column="1" Grid.Row="1" Text="{Binding BaudRate, Mode=TwoWay }">
+                            <sys:Int32>2400</sys:Int32>
+                            <sys:Int32>4800</sys:Int32>
+                            <sys:Int32>9600</sys:Int32>
+                            <sys:Int32>19200</sys:Int32>
+                            <sys:Int32>38400</sys:Int32>
+                            <sys:Int32>57600</sys:Int32>
+                            <sys:Int32>115200</sys:Int32>
+                            <sys:Int32>230400</sys:Int32>
+                        </ComboBox>
+                        <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Timeout, Mode=TwoWay}"  MouseWheel="TextBox_MouseWheel" />
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding Delay, Mode=TwoWay}" MouseWheel="TextBox_MouseWheel" />
+                        <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding Chartime, Mode=TwoWay}"  MouseWheel="TextBox_MouseWheel" />
+                        <TextBox Grid.Column="1" Grid.Row="5" Text="{Binding RepeatCount, Mode=TwoWay}"  MouseWheel="TextBox_MouseWheel" />
+                        <CheckBox Grid.Column="1" Grid.Row="6" IsChecked="{Binding CanLog, Mode=TwoWay}"  />
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </Popup>
+    </WrapPanel>
+    
+    
+    
+    
+    
+    
+</UserControl>

@@ -1,0 +1,105 @@
+﻿<UserControl x:Class="UI.AppSetsWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI;assembly="
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid Background="#FF252525" TextElement.FontSize="16" TextElement.Foreground="LightGreen">
+        <Grid.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="Dictionary1.xaml" />
+                    <ResourceDictionary Source="Resources\Icons.xaml" />
+                </ResourceDictionary.MergedDictionaries>
+
+                <Style TargetType="TextBlock" BasedOn="{StaticResource PopupTextBlock}" />
+                <Style TargetType="CheckBox" BasedOn="{StaticResource PopupCheckBox}" />
+                <Style TargetType="TextBox" BasedOn="{StaticResource PopupTextBox}" />
+                <Style TargetType="ComboBox" BasedOn="{StaticResource PopupComboBox}" />
+
+                <Style TargetType="local:CommSetsView" >
+                    <Setter Property="Margin" Value="3" />
+                </Style>
+            </ResourceDictionary>
+        </Grid.Resources>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"  >
+            <StackPanel ScrollViewer.VerticalScrollBarVisibility="Disabled">
+
+                <Expander IsExpanded="True">
+                    <Expander.Header>
+                        <TextBlock Text="Партия" Foreground="LightGreen"/>
+                    </Expander.Header>
+                    <StackPanel >
+                        <TextBlock Text="Компонент" />
+
+                        <ComboBox ItemsSource="{Binding [Gases1]}" 
+                                  FontSize="16"
+                                  Text="{Binding [ProductTypesInfo].FilterGas, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged }" />
+                        
+                        <TextBlock Text="Исполнение" />
+                        <ComboBox ItemsSource="{Binding [ProductTypes]}" 
+                                  DisplayMemberPath="ProductType.Name" 
+                                  SelectedValuePath="ProductType.Name"
+                                  SelectedValue="{Binding [CurentPartyInfo].Party.Party.ProductType, 
+                            Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="Наименование" />
+                        <TextBox Text="{Binding [CurentPartyInfo].Party.Party.Name, Mode=TwoWay, 
+                                                NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+
+                        <TextBlock Text="Способ расчёта термокомпенсации" />
+                        <ComboBox ItemsSource="{Binding [AppSets].CalculateTermoMethodUIValues}" 
+                                  FontSize="16"
+                                  Text="{Binding [AppSets].CalculateTermoMethodUI, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=Default}" />                        
+
+                    </StackPanel>
+                </Expander>
+
+                <Expander IsExpanded="True">
+                    <Expander.Header>
+                        <TextBlock Text="СОМ порты" Foreground="LightGreen" />
+                    </Expander.Header>
+                    <StackPanel>
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type local:CommSetsView}">
+                                <Setter Property="Background" Value="{StaticResource GreyBlackBackground}" />
+                            </Style>
+                        </StackPanel.Resources>
+                        <local:CommSetsView Title="Стенд ЭХЯ" 
+                                            DataContext="{Binding [AppSets].ComportECC}" 
+                                            TitleWidth="130" />
+                        <local:CommSetsView Title="Программатор" 
+                                            IsAddyTextBoxVisible="True"
+                                            TitleWidth="130"
+                                            DataContext="{Binding [AppSets].ComportProg}"/>
+                    </StackPanel>
+                </Expander>
+
+                <Expander DataContext="{Binding [CurentPartyInfo].Party.Party}">
+                    <Expander.Header>
+                        <TextBlock Text="ПГС" Foreground="LightGreen"/>
+                    </Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel MinWidth="100">
+                            <TextBlock Text="ПГС1" />
+                            <TextBox Text="{Binding PGS1, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <StackPanel MinWidth="100">
+                            <TextBlock Text="ПГС2" />
+                            <TextBox Text="{Binding PGS2, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+
+                        <StackPanel MinWidth="100">
+                            <TextBlock Text="ПГС3" />
+                            <TextBox Text="{Binding PGS3, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+                
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

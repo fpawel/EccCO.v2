@@ -1,0 +1,1791 @@
+﻿<Controls:MetroWindow x:Class="UI.MainWindow"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+                      xmlns:local="clr-namespace:UI" 
+                      xmlns:report="clr-namespace:UI.Reports" 
+                      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                      xmlns:winformchart="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
+                      x:Name="mainWindow" 
+                      WindowState="Maximized"
+                      Height="350" Width="525">
+    <Controls:MetroWindow.Title>
+        <MultiBinding>
+            <MultiBinding.Converter>
+                <local:MainWindowTitlePartyInfoConverter />
+            </MultiBinding.Converter>
+            <Binding Path="[CurentPartyInfo].Party.Party.ProductType" />
+            <Binding Path="[CurentPartyInfo].Party.Party.Name" />
+            <Binding Path="[CurentPartyInfo].Party.Party.Date" />            
+        </MultiBinding>
+        
+    </Controls:MetroWindow.Title>
+
+    <Controls:MetroWindow.Resources>
+        
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>                
+                <ResourceDictionary Source="Dictionary1.xaml" />                
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        
+    </Controls:MetroWindow.Resources>
+    <Grid>
+        <Grid.Resources>
+            <local:GridColumnDefinitionWidthConverter1 x:Key="GridColumnDefinitionWidthConverter1" />
+        </Grid.Resources>
+
+        <Grid Visibility="{Binding [MainWindowViewState].State.IsProductTypesEdit, Converter={StaticResource ShowIfFalseConverter}}" >
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="{Binding [MainWindowViewState].State.IsProductInfo, Converter={StaticResource GridColumnDefinitionWidthConverter1}}"  />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--верхняя панель-->
+            <Border Grid.Row="0" Grid.ColumnSpan="2" >
+                <Grid>
+                    <Grid.Resources>
+                        <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MetroButton}"  >
+                            <Setter Property="Margin" Value="3" />
+                            <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
+                        </Style>
+
+                        <Style TargetType="{x:Type StackPanel}"  >
+                            <Setter Property="Orientation" Value="Horizontal" />
+                        </Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource MetroTextBlock}" >
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="FontSize" Value="14" />
+                            <Setter Property="Foreground" Value="SkyBlue" />
+                        </Style>
+
+                        <Style TargetType="Rectangle">
+                            <Setter Property="Width" Value="20" />
+                            <Setter Property="Height" Value="20" />
+                            <Setter Property="Fill" Value="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            <Setter Property="Margin" Value="2" />
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--панель кнопок меню-->
+                    <StackPanel Orientation="Horizontal">
+
+                        <!--инструменты-->
+                        <Button Click="Button_Click_OpenContextMenu" ContextMenuService.Placement="Bottom" 
+                                x:Name="ButtonToolsMenu" ContextMenuService.ShowOnDisabled="True" >
+                            <Rectangle ToolTip="Настройка и управление">
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_input_down}" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <ContextMenu.Resources>
+                                        <Style TargetType="MenuItem" BasedOn="{StaticResource MyMenuItem}" />
+                                        <HierarchicalDataTemplate DataType="{x:Type vm:Operation}" ItemsSource="{Binding Items}"
+                                                          xmlns:vm="clr-namespace:HierarchicalOperationViewModels;assembly=Library1"
+                                                          x:Key="HierarchicalDataTemplate1"  >
+                                            <Grid TextElement.Foreground="LightGreen"   >
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox IsChecked="{Binding State.Checked, Mode=TwoWay}" VerticalAlignment="Center" Margin="3,1,0,0" 
+                                                  IsThreeState="false" Background="Transparent" />
+                                                <!--Checked="MenuItemoperation_CheckBox_Checked" Unchecked="MenuItemoperation_CheckBox_Unchecked"-->
+                                                <Border Grid.Column="1"  BorderBrush="Aqua">
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,1,0,0" />
+                                                </Border>
+                                            </Grid>
+                                        </HierarchicalDataTemplate>
+                                        <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
+                                            <Setter Property="Background" Value="{DynamicResource MenuBackgroundBrush}" />
+                                            <Setter Property="IsTabStop" Value="False" />
+                                            <Setter Property="Margin" Value="0" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Separator}">
+                                                        <Grid Margin="0" SnapsToDevicePixels="true">
+                                                            <Rectangle Fill="#E0E0E0" Height="1" Margin="0" />
+                                                            <Rectangle Fill="White" Height="1" Margin="0" />
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ContextMenu.Resources>
+                                    <MenuItem ItemsSource="{Binding [MenuScenaryTree].Items}" 
+                                          Command="{Binding [MenuScenaryTree].Perform}"
+                                          Visibility="{Binding [Thread2].IsPerforming, Converter={StaticResource ShowIfFalseConverter}}"
+                                          ItemTemplate="{StaticResource HierarchicalDataTemplate1}">
+                                        <MenuItem.ItemContainerStyle>
+                                            <Style TargetType="MenuItem" BasedOn="{StaticResource MyMenuItem}">
+                                                <Setter Property="Command" Value="{Binding Perform}" />
+                                            </Style>
+                                        </MenuItem.ItemContainerStyle>
+                                        <MenuItem.Header>
+                                            <Grid TextElement.Foreground="LightGreen" DataContext="{Binding [MenuScenaryTree]}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Rectangle Width="15" Height="15" Grid.Column="0">
+                                                    <Rectangle.OpacityMask>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_arrow_right}" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <CheckBox IsChecked="{Binding State.Checked, Mode=TwoWay}" VerticalAlignment="Center" Margin="3,1" 
+                                                      IsThreeState="false" Background="Transparent" 
+                                                      Grid.Column="1"/>
+
+                                                <Border Grid.Column="2" PreviewMouseDown="OperationItemBorder_PreviewMouseDown" >
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="3,1"  />
+                                                </Border>
+                                            </Grid>
+                                        </MenuItem.Header>
+                                    </MenuItem>
+
+
+                                    <MenuItem Command="{Binding [SetProgFlashMode]}" 
+                                          Visibility="{Binding [Thread2].IsPerforming, Converter={StaticResource ShowIfFalseConverter}}">
+                                        <MenuItem.Header>
+                                            <StackPanel>
+                                                <Rectangle Width="15" Height="15">
+                                                    <Rectangle.OpacityMask>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_graph_boxplot}" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Text="Программатор" />
+                                            </StackPanel>
+                                        </MenuItem.Header>
+                                    </MenuItem>
+
+                                    <Separator />
+                                    <MenuItem >
+                                        <MenuItem.Header>
+                                            <StackPanel>
+                                                <Rectangle Width="15" Height="15">
+                                                    <Rectangle.OpacityMask>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_database}" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Text="Новая партия..." />
+                                            </StackPanel>
+                                        </MenuItem.Header>
+                                        <MenuItem.Items>
+                                            <MenuItem Command="{Binding [CreateNewBatch]}" ToolTip="Создать новую партию электрохимических ячеек" >
+                                                <MenuItem.Header>
+                                                    <StackPanel>
+                                                        <Rectangle Width="10" Height="10">
+                                                            <Rectangle.OpacityMask>
+                                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}" />
+                                                            </Rectangle.OpacityMask>
+                                                        </Rectangle>
+                                                        <TextBlock Text="Создать" />
+                                                    </StackPanel>
+                                                </MenuItem.Header>
+                                            </MenuItem>
+                                            <MenuItem ToolTip="Создать копию текущей партии электрохимических ячеек" 
+                                                      Command="{Binding [MakeCopyBatch]}">
+                                                <MenuItem.Header>
+                                                    <StackPanel>
+                                                        <Rectangle Width="10" Height="10">
+                                                            <Rectangle.OpacityMask>
+                                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_page_copy}" />
+                                                            </Rectangle.OpacityMask>
+                                                        </Rectangle>
+                                                        <TextBlock Text="Создать копию" />
+                                                    </StackPanel>
+                                                </MenuItem.Header>
+                                            </MenuItem>
+                                        </MenuItem.Items>
+
+                                    </MenuItem>
+                                    <MenuItem ToolTip="Открыть архив сохранённых партий электрохимических ячеек для обзора и выбора партии"
+                                      Click="MenuItem_Click">
+                                        <MenuItem.Header>
+                                            <StackPanel>
+                                                <Rectangle Width="15" Height="15">
+                                                    <Rectangle.OpacityMask>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_disk}" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Text="Архив" />
+                                            </StackPanel>
+                                        </MenuItem.Header>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="Таблица исполнений" ToolTip="открыть таблицу существующих исполнений"
+                                          Command="{Binding [ShowProductTypesEdit]}" />
+                                    <Separator />
+
+                                    <MenuItem>
+                                        <MenuItem.Header>
+                                            <StackPanel>
+                                                <Rectangle Width="15" Height="15">
+                                                    <Rectangle.OpacityMask>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_page}" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Text="Отчёт" />
+                                            </StackPanel>
+                                        </MenuItem.Header>
+
+                                        <MenuItem Command="{Binding [ShowSummaryTable]}" 
+                                          ToolTip="Отчёт - сводная таблица">
+                                            <MenuItem.Header>
+                                                <StackPanel>
+                                                    <Rectangle Width="15" Height="15">
+                                                        <Rectangle.OpacityMask>
+                                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_table}" />
+                                                        </Rectangle.OpacityMask>
+                                                    </Rectangle>
+                                                    <TextBlock Text="Таблица" />
+                                                </StackPanel>
+                                            </MenuItem.Header>
+                                        </MenuItem>
+
+                                        <MenuItem Command="{Binding [ShowPasportDax]}" 
+                                          ToolTip="Отчёт - паспорта ДАХ">
+                                            <MenuItem.Header>
+                                                <StackPanel>
+                                                    <Rectangle Width="15" Height="15">
+                                                        <Rectangle.OpacityMask>
+                                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_page}" />
+                                                        </Rectangle.OpacityMask>
+                                                    </Rectangle>
+                                                    <TextBlock Text="Паспорта ДАХ" />
+                                                </StackPanel>
+                                            </MenuItem.Header>
+                                        </MenuItem>
+
+                                        <MenuItem Command="{Binding [ShowPasportSou]}" 
+                                          ToolTip="Отчёт - паспорта СОУ">
+                                            <MenuItem.Header>
+                                                <StackPanel>
+                                                    <Rectangle Width="15" Height="15">
+                                                        <Rectangle.OpacityMask>
+                                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_page_bold}" />
+                                                        </Rectangle.OpacityMask>
+                                                    </Rectangle>
+                                                    <TextBlock Text="Паспорта СОУ" />
+                                                </StackPanel>
+                                            </MenuItem.Header>
+                                        </MenuItem>
+                                    </MenuItem>
+                                    <MenuItem Header="Ввод Кч на температуре" Click="MenuItem_Click_2" />
+
+                                    <Separator />
+
+                                    <MenuItem  Click="MenuItem_Click_3" >
+                                        <MenuItem.Header>
+                                            <StackPanel>
+                                                <Rectangle Width="15" Height="15">
+                                                    <Rectangle.OpacityMask>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_question}" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Text="О программе" />
+                                            </StackPanel>
+                                        </MenuItem.Header>
+
+
+                                    </MenuItem>
+
+
+
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+
+                        <Button Click="ShowPopupOnButtonClick" Tag="{Binding ElementName=PopupStend}" ToolTip="Стенд">
+                            <Rectangle>
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_tiles_sixteen}" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </Button>
+
+                        <StackPanel Orientation="Horizontal"
+                                Visibility="{Binding [Thread2].IsPerforming, Converter={StaticResource ShowIfFalseConverter}}" >
+                            <Button ToolTip="&quot;Прошивка&quot; партии" 
+                                Command="{Binding [ProgParty]}">
+                                <Rectangle>
+                                    <Rectangle.OpacityMask>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_upload}" />
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </Button>
+
+                            <Button ToolTip="Считать &quot;прошивку&quot;" 
+                                Click="ShowPopupOnButtonClick" Tag="{Binding ElementName=PopupReadFlashDialog}">
+                                <Rectangle>
+                                    <Rectangle.OpacityMask>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_download}" />
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </Button>
+
+                            <Button ToolTip="Запустить циклический опрос стенда ЭХЯ" 
+                                Command="{Binding [Interrogate]}">
+                                <Rectangle>
+                                    <Rectangle.OpacityMask>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_loop}" />
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </Button>
+
+                        </StackPanel>
+
+                        <!--кнопка прерывания выполнения-->
+                        <Button ToolTip="Прервать выполнение" Command="{Binding [BreakThread2]}" 
+                                Background="{StaticResource MidleAqua}"
+                                Visibility="{Binding [Thread2].IsPerforming, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Rectangle>
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_stop}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+                    </StackPanel>
+
+                    <!--информация о выполняемой операции-->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" 
+                                DataContext="{Binding [Thread2]}"
+                                Visibility="{Binding IsPerforming, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="{Binding StartTime, StringFormat=hh\\:mm\\:ss}" 
+                                   Foreground="LightSteelBlue" Margin="3" 
+                                   FontSize="22"/>
+                        <TextBlock Text="{Binding ElepsedTime, StringFormat=hh\\:mm\\:ss}" 
+                                   Foreground="SkyBlue" Margin="3" FontSize="22"/>
+                        <TextBlock Text="{Binding Operation.FullName}" 
+                                   Foreground="{StaticResource MyGreenOnGreyBlack}" Margin="3" FontSize="22" />
+                        
+                        
+                    </StackPanel>
+
+                    <!--кнопки сохранение и настройки-->
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Margin" Value="3,0" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                
+                            </Style>
+                        </StackPanel.Resources>
+                        <StackPanel Orientation="Horizontal"
+                                    DataContext="{Binding [TemperatureInfo]}"
+                                    Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal"
+                                        TextElement.Foreground="{StaticResource MyGreenOnGreyBlack}"
+                                        Visibility="{Binding IsError, Converter={StaticResource ShowIfFalseConverter}}">
+                                <TextBlock Text="{Binding Value, Converter={StaticResource FSharpDecimalOptionConverter}}" 
+                                           Margin="3,0,0,0"/>
+                                <TextBlock Margin="0">
+                                    "C
+                                </TextBlock>
+                                
+                            </StackPanel>
+                            
+                            <TextBlock Text="Ошибка связи" Foreground="Yellow"
+                                       Visibility="{Binding IsError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            
+                        </StackPanel>
+                        <TextBlock>
+                            
+                        </TextBlock>
+
+                        <Button ToolTip="Выбрать колонки" Click="ShowPopupOnButtonClick" Tag="{Binding ElementName=PopupSelectcolumns}" >
+                            <Rectangle >
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_lines_horizontal_4}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+
+                        <Button Visibility="{Binding [MainWindowViewState].IsDataChanged, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Command="{Binding [SaveChanges]}" ToolTip="Сохранить изменения">
+                            <Rectangle>
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_save}" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </Button>
+
+                        <Button ToolTip="Настройки" Click="ShowPopupOnButtonClick" Tag="{Binding ElementName=PopupSettings}">
+                            <Rectangle>
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_settings}" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+            </Border>
+            
+
+            <!--основная таблица данных-->
+            <DataGrid Grid.Row="1" HeadersVisibility="All" SelectionMode="Extended"  SelectionUnit="Cell"
+                      Margin="10"
+                      ItemsSource="{Binding [CurentPartyInfo].Party.Products}" AutoGenerateColumns="False"
+                      x:Name="DataGridProducts" x:FieldModifier="public" FontSize="14" CanUserSortColumns="False">
+                <DataGrid.Resources>
+                    <local:ForegroundConverter1 x:Key="ForegroundConverter1" />
+                    <local:ForegroundConverter2 x:Key="ForegroundConverter2" />
+                </DataGrid.Resources>
+                <DataGrid.RowHeaderTemplate>
+                    <DataTemplate>
+                        <StackPanel DataContext="{Binding Item, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridRow}}}"
+                                    Orientation="Horizontal">
+
+                            <TextBlock Text="{Binding F7}" Margin="3,1" Foreground="{StaticResource MyColumnHeaderForeground}" FontSize="14"/>
+                            <Button Command="{Binding Select}" Width="25" Height="20" Padding="0" 
+                                    BorderThickness="0" Margin="0" Background="{StaticResource GreyBlackBackground}" >
+                                <Button.ToolTip>
+                                    <StackPanel Orientation="Horizontal" TextElement.FontSize="16">
+                                        <TextBlock Text="Расчёт темрмокомпенсации фонового тока и чувствительности ЭХЯ" />
+                                        <TextBlock Text="{Binding F7}" Margin="3,0" Foreground="LightGreen"/>
+                                        <TextBlock Text="№ &quot;" Margin="0"/>
+                                        <TextBlock Text="{Binding Product.Serial, Converter={StaticResource FSharpIntOptionConverter}}" Margin="0"/>
+                                        <TextBlock Text="&quot;" Margin="0,0,3,0"/>
+                                        <TextBlock Text="по произвольному количеству исходных точек" />
+                                    </StackPanel>
+                                </Button.ToolTip>
+                                <Rectangle Width="15"  Height="15" Margin="0" >
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_graph_line_green}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+
+                                
+                            </Button>
+
+                            <Rectangle Visibility="{Binding Product.IsCustomTermo, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                       Width="15"  Height="15" Margin="3,0" 
+                                       ToolTip="Для данной ЭХЯ заданы точки термокомпенсации">
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_warning_green}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                        </StackPanel>
+                    </DataTemplate>
+                </DataGrid.RowHeaderTemplate>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Выбор ЭХЯ для отчёта" CanUserReorder="False" CanUserResize="False">
+                        <DataGridTemplateColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+
+                                    <CheckBox IsChecked="{Binding DataContext.[CurentPartyInfo].Party.ProductsReportIncluded, ElementName=mainWindow, Mode=TwoWay}">
+                                        <CheckBox.ToolTip>
+                                            <StackPanel Orientation="Horizontal" TextElement.FontSize="16">
+                                                <TextBlock Text="Выбранность всех ЭХЯ партии для отчёта" Foreground="LightGreen" />
+                                            </StackPanel>
+                                        </CheckBox.ToolTip>
+                                    </CheckBox>
+
+                                    <Button Command="{Binding DataContext.[CurentPartyInfo].Party.IncludeReportOnlyValids, ElementName=mainWindow}" Width="25" Height="20" Padding="0" 
+                                            ToolTip="Вкючить в отчёт только те ячейки, для которых рассчитанные значения не выходят из допустимого диапазона"
+                                            BorderThickness="0" Margin="0" Background="{StaticResource GreyBlackBackground}" >
+                                        <Rectangle Width="15"  Height="15" Margin="0" >
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_calculator}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+
+
+                                    </Button>
+
+                                </StackPanel>
+                                
+                                
+                            </DataTemplate>
+                        </DataGridTemplateColumn.HeaderTemplate>
+
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox IsChecked="{Binding Product.IsReportIncluded, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
+                                                      VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <CheckBox.ToolTip>
+                                            <StackPanel Orientation="Horizontal" TextElement.FontSize="16">
+                                                <TextBlock Text="Выбранность ЭХЯ" Foreground="LightGreen" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding F7}" Foreground="Aqua" Margin="10" VerticalAlignment="Center" />
+                                                <TextBlock Text="для отчёта" Foreground="LightGreen" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </CheckBox.ToolTip>
+                                    </CheckBox>
+                                    <Rectangle Visibility="{Binding InfoExt.IsValid, Converter={StaticResource ShowIfFalseConverter}}" 
+                                                   Width="15"  Height="15" Margin="3,0" 
+                                                   ToolTip="Значения параметров данной ЭХЯ не удовлетворяют ограничениям исполнения">
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_warning_yellow}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </StackPanel>
+
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="№" Binding="{Binding Product.Serial, Mode=TwoWay, Converter={StaticResource FSharpIntOptionConverter}}"  />
+
+                    <DataGridTemplateColumn Header="ИБЯЛ">
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext[ProductTypes1], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" 
+                                          DisplayMemberPath="ProductType.Name" FontSize="14"
+                                          SelectedValuePath="ProductType.Name"
+                                          SelectedValue="{Binding Product.ProductType, 
+                                            Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Product.ProductType}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="фон20" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Product.Ifon, StringFormat={}{0:#0.0##}, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" 
+                                           Foreground="{Binding InfoExt.IsValidIfon, Converter={StaticResource ForegroundConverter2}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Product.Ifon, Mode=TwoWay, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    
+                    <DataGridTextColumn Header="ч(20)" 
+                                        Binding="{Binding Product.Isns, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    <DataGridTextColumn Header="фон(20).2" 
+                                        Binding="{Binding Product.I13, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    <DataGridTextColumn Header="фон(-20)" 
+                                        Binding="{Binding Product.If_20, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    <DataGridTextColumn Header=  "ч(-20)" 
+                                        Binding="{Binding Product.Is_20, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    <DataGridTextColumn Header="фон(50)" 
+                                        Binding="{Binding Product.If50, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    <DataGridTextColumn Header=  "ч(50)" 
+                                        Binding="{Binding Product.Is50, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    
+                    
+                    
+                    <DataGridTextColumn Header="ПГС2.4" 
+                                        Binding="{Binding Product.I24, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <DataGridTextColumn Header="ПГС3.5" 
+                                        Binding="{Binding Product.I35, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    <DataGridTextColumn Header="ПГС2.6" 
+                                        Binding="{Binding Product.I26, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    <DataGridTextColumn Header="ПГС1.7" 
+                                        Binding="{Binding Product.I17, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+                    <DataGridTextColumn Header="неизм." 
+                                        Binding="{Binding Product.In, Converter={StaticResource FSharpDecimalOptionConverter}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"  />
+
+                    <DataGridTemplateColumn Header="ЧУВСТВ." >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding InfoExt.Sensitive, StringFormat={}{0:#0.0##}, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" 
+                                           Foreground="{StaticResource MidleAqua}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="D.фон" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding InfoExt.Dfon, StringFormat={}{0:#0.0##}, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" 
+                                           Foreground="{Binding InfoExt.IsValidDi, Converter={StaticResource ForegroundConverter1}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="D.T" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding InfoExt.Dt, StringFormat={}{0:#0.0##}, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" 
+                                           Foreground="{Binding InfoExt.IsValidDt, Converter={StaticResource ForegroundConverter1}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Кч" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding InfoExt.Ksns, StringFormat={}{0:#0.0##}, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" 
+                                           Foreground="{Binding InfoExt.IsValidKsns, Converter={StaticResource ForegroundConverter1}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Кч50" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding InfoExt.Ksns50, StringFormat={}{0:#0.0##}, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" 
+                                           Foreground="{Binding InfoExt.IsValidKsns50, Converter={StaticResource ForegroundConverter1}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="D.неи" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding InfoExt.Dn, StringFormat={}{0:#0.0##}, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" 
+                                           Foreground="{Binding InfoExt.IsValidDn, Converter={StaticResource ForegroundConverter1}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+
+                    <DataGridTextColumn Header="#дата"  Binding="{Binding Flash.DateTime, Mode=OneWay, Converter={StaticResource FSharpDateTimeOptionConverter}, StringFormat='{}{0:dd.MM.yy HH:mm}'}" 
+                                                Foreground="LightGoldenrodYellow"  />
+                    <DataGridTextColumn Header="#ибял"  Binding="{Binding Flash.ProductType, Mode=OneWay}" Foreground="LightGoldenrodYellow"  />
+                    <DataGridTextColumn Header="#газ"  Binding="{Binding Flash.Gas, Mode=OneWay}" Foreground="LightGoldenrodYellow"  />
+                    <DataGridTextColumn Header="#ед.изм"  Binding="{Binding Flash.Units, Mode=OneWay}" Foreground="LightGoldenrodYellow"  />
+
+
+                    <DataGridTextColumn Header="#номер"  Binding="{Binding Flash.Serial, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" Foreground="LightGoldenrodYellow"  />
+                    <DataGridTextColumn Header="#шк.0"  Binding="{Binding Flash.ScaleMin, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" Foreground="LightGoldenrodYellow"  />
+                    <DataGridTextColumn Header="#шк.К"  Binding="{Binding Flash.ScaleMax, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}}" Foreground="LightGoldenrodYellow"  />
+                    <DataGridTextColumn Header="#ч"  Binding="{Binding Flash.Sens, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}" 
+                                                     Foreground="LightGoldenrodYellow"  />
+                    <DataGridTemplateColumn Header="искл.">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Width="25" Height="20" Padding="0" BorderThickness="0" Margin="0" 
+                                    Command="{Binding Unselect}"
+                                    Background="{StaticResource GreyBlackBackground}" >
+                                    <Button.ToolTip>
+                                        <StackPanel Orientation="Horizontal" TextElement.FontSize="16">
+                                            <TextBlock Text="Исключить ЭХЯ" Foreground="LightGreen" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding F7}" Foreground="Aqua" Margin="10" VerticalAlignment="Center" />
+                                            <TextBlock Text="из таблицы" Foreground="LightGreen" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button.ToolTip>
+                                    <Rectangle Width="10"  Height="10" Margin="0" >
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close_green}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="прог.">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" 
+                                            Visibility="{Binding DataContext[Thread2].IsPerforming, ElementName=mainWindow, Converter={StaticResource ShowIfFalseConverter}}">
+                                    <Button Width="25" Height="20" Padding="0" BorderThickness="0" Margin="3,0" 
+                                            Command="{Binding Prog}"
+                                            Background="{StaticResource GreyBlackBackground}" >
+                                        <Button.ToolTip>
+                                            <StackPanel Orientation="Horizontal" TextElement.FontSize="16">
+                                                <TextBlock Text="Прошить ЭХЯ" Foreground="LightGreen" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding F7}" Foreground="Aqua" Margin="10" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button.ToolTip>
+                                        <Rectangle Width="10"  Height="10" Margin="0" >
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_upload}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                    </Button>
+
+                                    <Button Width="25" Height="20" Padding="0" BorderThickness="0" Margin="3,0" 
+                                            Command="{Binding SendProgrammerView}"
+                                            Background="{StaticResource GreyBlackBackground}" >
+                                        <Button.ToolTip>
+                                            <StackPanel Orientation="Horizontal" TextElement.FontSize="16">
+                                                <TextBlock Text="Открыть расчитанные данные ЭХЯ" Foreground="LightGreen" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding F7}" Foreground="Aqua" Margin="10" VerticalAlignment="Center" />
+                                                <TextBlock Text="в режиме программатора" Foreground="LightGreen" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button.ToolTip>
+                                        <Rectangle Width="10"  Height="10" Margin="0" >
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_arrow_right}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                    </Button>
+
+                                </StackPanel>
+                                
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+                <DataGrid.RowStyle>
+                    <Style BasedOn="{StaticResource MetroDataGridRow}" TargetType="{x:Type DataGridRow}">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Product.IsChecked}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource AccentColorBrush3}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.CellStyle>
+                    <Style BasedOn="{StaticResource MetroDataGridCell}" TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Foreground" Value="{StaticResource MyGreenOnGreyBlack}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsInterrogated}" Value="True">
+                                <Setter Property="Background" Value="DarkGray"/>
+                                <Setter Property="Foreground" Value="Silver"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+            </DataGrid>
+
+            <!--графики ЭХЯ-->
+            <Grid Grid.Column="1" Grid.Row="1" >
+                <GroupBox DataContext="{Binding [CurentPartyInfo].Party.SelectedItem}"
+                      TextElement.FontWeight="Normal">
+                    <GroupBox.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" TextElement.FontSize="16" TextElement.Foreground="LightGreen">
+                                <TextBlock Text="Термокомпенсация ЭХЯ" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding F7}" VerticalAlignment="Center" Margin="5,0" Foreground="Aqua" FontWeight="Bold"  />
+                                <TextBlock Text="{Binding Product.Serial, Converter={StaticResource FSharpIntOptionConverter}}" VerticalAlignment="Center" />
+                                
+
+
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+
+                                <CheckBox Margin="10,0" IsChecked="{Binding Product.IsCustomTermo, Mode=TwoWay}"
+                                          FontSize="16" Foreground="LightGreen">
+                                    Ввод T
+                                </CheckBox>
+
+                                <Button Command="{Binding Prog}" ToolTip="Прошить данную ЭХЯ"
+                                        Margin="3,0" 
+                                        Background="{DynamicResource AccentColorBrush}">
+
+                                    <Rectangle Width="15"  Height="15" >
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_upload}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Button>
+
+                                <Button  Margin="3,0" ToolTip="Закрыть" Command="{Binding DataContext[SetNormalView], ElementName=mainWindow}" 
+                                        Background="{DynamicResource AccentColorBrush}">
+                                    <Rectangle Width="15"  Height="15">
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Button>
+
+                            </StackPanel>
+
+                        </Grid>
+                    </GroupBox.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <StackPanel Visibility="{Binding Product.IsCustomTermo, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                        Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Command="{Binding ConvertIsns}" ToolTip="Выполнить пересчёт токов чувствительности в проценты коэффициента чувствительности"
+                                    Margin="5,0" Background="{DynamicResource AccentColorBrush}">
+
+                                    <Rectangle Width="15"  Height="15" >
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_arrow_left_right}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Button>
+
+                                <Button Command="{Binding AddCalcTermoPoint}" Margin="5,0"
+                                    Background="{DynamicResource AccentColorBrush}">
+                                    <Rectangle Width="15"  Height="15">
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Button>
+
+                            </StackPanel>
+                            
+                            <Grid Visibility="{Binding Product.IsCustomTermo, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <local:WgtTermoPoints DataContext="{Binding TermoCalcItems}" />
+                            </Grid>
+
+                        </StackPanel>
+
+
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <GroupBox Header="Расчёт">
+                                <Grid>
+                                    <!--<ContentPresenter Content="{Binding DataContext[ChartTermo], ElementName=mainWindow}" />-->
+                                    <WindowsFormsHost x:Name="ChartTermoPlaceholder" x:FieldModifier="public" />
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Header="&quot;Прошивка&quot;" Grid.Row="1">
+                                <Grid>
+                                    <!--<ContentPresenter Content="{Binding DataContext[ChartFlashTermo], ElementName=mainWindow}" />-->
+                                    <WindowsFormsHost x:Name="ChartFlashPlaceholder" x:FieldModifier="public" />
+                                </Grid>
+
+                            </GroupBox>
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+
+            <!--статус прошивки-->
+            <Grid Grid.Row="1" Background="{StaticResource GreyBlackBackground}" 
+                  DataContext="{Binding [ProgInfo]}"
+                  Visibility="{Binding IsOpen, Converter={StaticResource BooleanToVisibilityConverter}}"
+                  VerticalAlignment="Center" HorizontalAlignment="Center">
+                <GroupBox Padding="10" MinHeight="50"                       
+                      TextElement.FontSize="16"
+                      VerticalAlignment="Center" HorizontalAlignment="Center" >
+                    <GroupBox.Header>
+                        <Grid Margin="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Прошивка партии" Margin="3,0" />
+
+                            <Button Grid.Column="1" VerticalAlignment="Top" Command="{Binding Continue}"
+                                    Visibility="{Binding IsWaitingContinue, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Background="{DynamicResource AccentColorBrush}"                                   
+                                    ToolTip="Продолжить прошивку" Margin="3,0">
+                                <Rectangle Width="15" Height="15" Margin="3,0">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_arrow_right}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+
+                            <Button Grid.Column="2" VerticalAlignment="Top" Command="{Binding Close}"
+                                    Visibility="{Binding CanClose, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Background="{DynamicResource AccentColorBrush}"                                   
+                                    ToolTip="Закрыть" Margin="3,0">
+                                <Rectangle Width="15" Height="15" Margin="3,0">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+                        </Grid>
+                    </GroupBox.Header>
+                    <StackPanel>
+                        <TextBlock Margin="3" MaxWidth="400" MinWidth="300"
+                                   Visibility="{Binding HasResult, Converter={StaticResource ShowIfFalseConverter}}"
+                                   Text="{Binding Text}" FontSize="18"  TextWrapping="WrapWithOverflow"
+                                   Foreground="{Binding Foreground}"/>
+                        
+                        <Expander Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                  Background="{StaticResource GreyBlackBackground}"
+                                  MaxHeight="300" >
+                            <Expander.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Text}" MaxWidth="400" MinWidth="300" 
+                                               Foreground="{Binding Foreground}" />
+                                    
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Rectangle Width="15" Height="15" 
+                                               Visibility="{Binding IsError, Converter={StaticResource ShowIfFalseConverter}}" >
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_information_circle}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+
+                                        <Rectangle Width="15" Height="15" 
+                                               Visibility="{Binding IsError, Converter={StaticResource BooleanToVisibilityConverter}}" >
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_warning_yellow}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>                                        
+                                    </StackPanel>
+                                </Grid>
+                            </Expander.Header>
+                            <ListBox ItemsSource="{Binding Result}" TextElement.FontSize="16" TextElement.Foreground="{StaticResource MyGreenOnGreyBlack}"
+                                     ItemContainerStyle="{StaticResource MyMetroListBoxItem_DisableSelection}">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel IsItemsHost="True" MaxWidth="300" />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Width="80" >
+                                            <TextBlock Text="{Binding Product.F7}" Margin="3" Foreground="LightGreen" />
+                                            <Grid Visibility="{Binding IsVerified, Converter={StaticResource ShowIfFalseConverter}}" >
+                                                <Rectangle Visibility="{Binding Info.IsWriten, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                           Width="15"  Height="15" Margin="3" 
+                                           ToolTip="Расчитанные данные этой ЭХЯ были прошита, но не проверена">
+                                                    <Rectangle.Fill>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_check_green}" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                                <Rectangle Visibility="{Binding Info.IsVerified, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                               Width="15"  Height="15" Margin="3,0" 
+                                               ToolTip="Расчитанные данные этой ЭХЯ были прошиты и проверены">
+                                                    <Rectangle.Fill>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_check_midleaqua}" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                                <Rectangle Visibility="{Binding Info.IsError, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                               Width="15"  Height="15" Margin="3" >
+                                                    <Rectangle.Fill>
+                                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_warning_yellow}" />
+                                                    </Rectangle.Fill>
+                                                    <Rectangle.ToolTip>
+                                                        <StackPanel TextElement.Foreground="{StaticResource MyGreenOnGreyBlack}" TextElement.FontSize="16">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="При прошивке ЭХЯ" Margin="3" />
+                                                                <TextBlock Text="{Binding Product.F7}" Margin="3" Foreground="Aqua" />
+                                                                <TextBlock Text="произошла ошибка:" Margin="3" />
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Info.Error1}" Margin="3" Foreground="Yellow" />
+                                                        </StackPanel>
+                                                    </Rectangle.ToolTip>
+                                                </Rectangle>
+                                            </Grid>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                        </Expander>
+
+                        <ProgressBar Grid.Row="1" Margin="5" MinWidth="200"
+                                     Visibility="{Binding IsProgressVisible, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                     Maximum="{Binding Max}" Value="{Binding Progress}"/>
+
+                    </StackPanel>
+
+
+                </GroupBox>
+
+            </Grid>
+
+            <!--модальное сообщение -->
+            <Grid Grid.Row="1" Background="{StaticResource GreyBlackBackground}" 
+                  VerticalAlignment="Center" HorizontalAlignment="Center" 
+                  Visibility="{Binding [Thread2].MessageDialog.IsOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <GroupBox Header="{Binding [Thread2].MessageDialog.Title}" Padding="10" MinHeight="50" 
+                          VerticalAlignment="Center" HorizontalAlignment="Center" >
+                    <StackPanel Orientation="Horizontal" DataContext="{Binding [Thread2].MessageDialog}">
+
+                        <Rectangle Width="40" Height="40" VerticalAlignment="Center" Margin="5,5,15,5"
+                                   Visibility="{Binding IsInfo, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_information_circle}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                        <Rectangle Width="40" Height="40" VerticalAlignment="Center"  Margin="5,5,15,5" 
+                                   Visibility="{Binding IsWarn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_warning_green}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                        <Rectangle Width="40" Height="40" VerticalAlignment="Center"  Margin="5,5,15,5"
+                                   Visibility="{Binding IsError, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_warning_yellow}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                        <TextBlock Text="{Binding Text}" FontSize="22" MaxWidth="300"  TextWrapping="WrapWithOverflow"
+                               Foreground="{StaticResource MyGreenOnGreyBlack}"/>
+
+                        <Button Background="{DynamicResource AccentColorBrush}"
+                                    Grid.Column="2" Margin="10" VerticalAlignment="Top" Command="{Binding Close}"
+                                    ToolTip="Закрыть">
+                            <Rectangle Width="20" Height="20">
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+
+                    </StackPanel>
+                </GroupBox>
+
+            </Grid>
+
+
+            <!--попап дерева партий-->
+            <Popup Grid.Row="1" StaysOpen="False" PopupAnimation="Fade"  TextElement.FontSize="16" Margin="0" 
+               PlacementTarget="{Binding ElementName=ButtonToolsMenu}"
+               x:Name="PopupBrowseRepository">
+                <local:WgtPartiesTree Margin="0" Padding="0" />
+            </Popup>
+
+            <!--попап стенд-->
+            <Popup Grid.Row="1" StaysOpen="False" PopupAnimation="Fade"
+               x:Name="PopupStend" Margin="0" >
+                <local:WgtECCs Margin="0" Padding="0" />
+            </Popup>
+
+            <!--попап настроек-->
+            <Popup Grid.Row="0" StaysOpen="False" PopupAnimation="Fade" x:Name="PopupSettings"  AllowsTransparency="True">
+                <local:AppSetsWidget  />
+            </Popup>            
+
+            <!--попап выбора видимых колонок таблицы-->
+            <Popup Grid.Row="0" StaysOpen="False" PopupAnimation="Fade" x:Name="PopupSelectcolumns"  AllowsTransparency="True">
+                <Border Background="{StaticResource GreyBlackBackground}">
+                    <GroupBox >
+                        <GroupBox.Header>
+                            <TextBlock Text="Выбор видимых колонок таблицы" FontSize="16" Foreground="LightGreen"/>
+                        </GroupBox.Header>
+                        <ListBox DataContext="{Binding Columns, ElementName=DataGridProducts}" ItemsSource="{Binding}" >
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox IsChecked="{Binding Visibility, Mode=TwoWay, Converter={StaticResource DataGridcolumnVisibilityConverter}}"
+                                                  FontSize="16" Foreground="{StaticResource MyGreenOnGreyBlack}"
+                                                  Content="{Binding Header}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </GroupBox>
+                </Border>
+            </Popup>
+
+            <!--диалог параметров считывания прошивки-->
+            <Popup x:Name="PopupReadFlashDialog" StaysOpen="False" PopupAnimation="Fade" Placement="Bottom" PlacementTarget="{Binding ElementName=mainWindow}" >
+                <Border Background="{StaticResource GreyBlackBackground}" TextElement.FontSize="16">
+                    <GroupBox Header="Считать &quot;прошивку&quot;" Padding="10" MinHeight="50" 
+                              VerticalAlignment="Center" HorizontalAlignment="Center" >
+                        <StackPanel Orientation="Horizontal" >
+                            <StackPanel.Resources>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource PopupTextBlock}" />
+                                <Style TargetType="CheckBox" BasedOn="{StaticResource PopupCheckBox}" />
+                                <Style TargetType="ComboBox" BasedOn="{StaticResource PopupComboBox}" />
+                            </StackPanel.Resources>
+                            <StackPanel Orientation="Horizontal" DataContext="{Binding [Programmer][ProcessInfo]}">
+                                <TextBlock Text="Номер" />
+                                <ComboBox Text="{Binding N1, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged }"
+                                      VerticalAlignment="Center">
+                                    <ComboBoxItem>1</ComboBoxItem>
+                                    <ComboBoxItem>2</ComboBoxItem>
+                                    <ComboBoxItem>3</ComboBoxItem>
+                                    <ComboBoxItem>4</ComboBoxItem>
+                                    <ComboBoxItem>5</ComboBoxItem>
+                                    <ComboBoxItem>6</ComboBoxItem>
+                                    <ComboBoxItem>7</ComboBoxItem>
+                                    <ComboBoxItem>8</ComboBoxItem>
+                                </ComboBox>
+                                <CheckBox IsChecked="{Binding Is64, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}">64</CheckBox>
+                            </StackPanel>
+                            
+                            <Button Background="{DynamicResource AccentColorBrush}" Click="Button_Click_2"
+                                    Margin="10" VerticalAlignment="Top" Command="{Binding [ReadFlashCommand]}"
+                                    ToolTip="Закрыть">
+                                <Rectangle Width="20" Height="20">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_check}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+                        </StackPanel>
+
+
+                    </GroupBox>
+                </Border>
+            </Popup>
+        </Grid>
+
+        <!--Таблица исполнений-->
+        <GroupBox Visibility="{Binding [MainWindowViewState].State.IsProductTypesEdit, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <GroupBox.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" FontSize="16" Foreground="LightGreen" FontWeight="Bold"> 
+                        Таблица существующих исполнений
+                    </TextBlock>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" >
+
+                        <Button Margin="3,0,0,0" HorizontalAlignment="Right" ToolTip="Создать новое исполнение"
+                                Background="{DynamicResource AccentColorBrush}"
+                                Visibility="{Binding [ProductTypesInfo].IsProductTypesChanged, Converter={StaticResource BooleanToVisibilityConverter}, Mode=OneWay}"
+                                Command="{Binding [SaveProductTypes]}">
+                            <Rectangle Width="15"  Height="15">
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_save}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+
+                        <Button Margin="3,0,0,0" HorizontalAlignment="Right" ToolTip="Создать новое исполнение"
+                                Background="{DynamicResource AccentColorBrush}"
+                                Command="{Binding [AddProductType]}">
+                            <Rectangle Width="15"  Height="15">
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+
+                        <Button Grid.Column="1" Margin="3,0" ToolTip="Закрыть" Command="{Binding [ApplyProductTypesEdit]}" 
+                                Background="{DynamicResource AccentColorBrush}">
+                            <Rectangle Width="15"  Height="15">
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+                        
+
+                    </StackPanel>
+                </Grid>
+            </GroupBox.Header>
+            <DataGrid SelectionMode="Single" Margin="5"
+                      HeadersVisibility="All" ItemsSource="{Binding [ProductTypes], Mode=OneTime}"
+                      CanUserAddRows="False" SelectionUnit="Cell"
+                      CanUserSortColumns="False"
+                      AutoGenerateColumns="False" 
+                      TextElement.FontSize="14">
+                <DataGrid.RowStyle>
+                    <Style BasedOn="{StaticResource MetroDataGridRow}" TargetType="{x:Type DataGridRow}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource AccentColorBrush3}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    
+                    <DataGridTextColumn Header="Исп." Binding="{Binding ProductType.Name}" />
+                    
+                    <DataGridTemplateColumn Header="T">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Margin="1" Padding="3" Background="{DynamicResource AccentColorBrush}"
+                                            Click="ShowPopupOnButtonClick" Tag="{Binding ElementName=PopupProductTypeTermoPoints}">
+                                        <Button.ToolTip>
+                                            <StackPanel>
+                                                <TextBlock Text="Ввод термокомпенсации исполнения" Foreground="LightGreen" />
+                                                <TextBlock Text="{Binding ProductType.Name}" Foreground="Aqua" />
+                                            </StackPanel>
+                                        </Button.ToolTip>
+                                        <Rectangle Width="15"  Height="15" >
+                                            <Rectangle.Fill>
+                                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_graph_line_green}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                    </Button>
+
+                                    <Rectangle Width="15"  Height="15" 
+                                               ToolTip="Для данного исполнения заданы точки термокомпенсации"
+                                               Visibility="{Binding ProductType.TermoPoints.Length, Converter={StaticResource ShowIfGreateThenNullConverter}}">
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_warning_green}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                    
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Газ" >
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext[Gases], ElementName=mainWindow}" 
+                                          FontSize="16"
+                                          Text="{Binding ProductType.Gas, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged }" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ProductType.Gas}" VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="ед.изм." >
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext[Units], ElementName=mainWindow}" FontSize="16"
+                                          Text="{Binding ProductType.Units, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged }" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ProductType.Units}" VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Терм.">
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext[CalculateTermoMethods], ElementName=mainWindow}" 
+                                                  FontSize="16"
+                                                  Text="{Binding ProductType.CalculateTermoMethod1, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged }" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ProductType.CalculateTermoMethod1}" VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Шкала" Binding="{Binding ProductType.Scale}" />
+                    <DataGridTextColumn Header="Драг.мет." Binding="{Binding ProductType.NobleMetalContent}" />
+                    <DataGridTextColumn Header="Гарант." Binding="{Binding ProductType.LifetimeWarrianty}" />
+
+                    <DataGridTemplateColumn Header="64">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding ProductType.Is64, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="ФОН.макс" Binding="{Binding ProductType.Ifon_max, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTextColumn Header="D.ФОН.макс" Binding="{Binding ProductType.DeltaIfon_max, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTextColumn Header="КЧ.мин" Binding="{Binding ProductType.Ksns_min, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTextColumn Header="КЧ.макс" Binding="{Binding ProductType.Ksns_max, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTextColumn Header="D.неизм.макс" Binding="{Binding ProductType.Delta_nei_max, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTextColumn Header="D.T.мин" Binding="{Binding ProductType.Delta_t_min, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTextColumn Header="D.T.макс" Binding="{Binding ProductType.Delta_t_max, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTextColumn Header="КЧ40.мин" Binding="{Binding ProductType.Ks40_min, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTextColumn Header="КЧ40.макс" Binding="{Binding ProductType.Ks40_max, Converter={StaticResource FSharpDecimalOptionConverter}}" />
+                    <DataGridTemplateColumn CanUserResize="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding Remove}" 
+                                        Margin="1" Padding="3"
+                                        Background="{DynamicResource AccentColorBrush}">
+                                    <Button.ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="Удалить исполнение" Foreground="LightGreen" />
+                                            <TextBlock Text="{Binding ProductType.What}" Foreground="Aqua" />
+                                        </StackPanel>
+                                    </Button.ToolTip>
+                                    <Rectangle Width="15"  Height="15" >
+                                        <Rectangle.Fill>
+                                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <!--диалог ввода точек термокомпенсации-->
+        <Popup StaysOpen="False" PopupAnimation="Fade" Placement="Bottom" 
+               DataContext="{Binding [ProductTypes][0]}"
+               x:Name="PopupProductTypeTermoPoints">
+            <Border Background="{StaticResource GreyBlackBackground}" TextElement.FontSize="16">
+                <GroupBox Padding="10" MinHeight="50"  VerticalAlignment="Center" HorizontalAlignment="Center" >
+                    <GroupBox.Header>
+                        <StackPanel Orientation="Horizontal" TextElement.FontSize="16">
+                            <TextBlock Text="Термокомпенсация &quot;" />
+                            <TextBlock Text="{Binding ProductType.Name}" />
+                            <TextBlock Text="&quot;" />
+
+                            <Button Margin="3,0" ToolTip="Добавить точку термокомпесации" Command="{Binding AddTermoPoint}" 
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_add}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+
+                        </StackPanel>
+                    </GroupBox.Header>
+                    <local:WgtTermoPoints DataContext="{Binding TermoPoints}" />
+
+
+                </GroupBox>
+
+            </Border>
+            
+        </Popup>
+
+        <!--Итоговая таблица-->
+        <Border Background="{StaticResource GreyBlackBackground}"
+                Visibility="{Binding [MainWindowViewState].State.IsReportSummaryTable, Converter={StaticResource BooleanToVisibilityConverter}}" >
+            <GroupBox >
+                <GroupBox.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" FontSize="16" Foreground="LightGreen" FontWeight="Bold"> 
+                        Сводная таблица
+                        </TextBlock>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" >
+
+                            <Button Grid.Column="1" Margin="3,0" ToolTip="Печать" Click="Button_Click_1"
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_printer}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+
+                            <Button Grid.Column="1" Margin="3,0" ToolTip="Закрыть" Command="{Binding [SetNormalView]}" 
+                                Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox.Header>
+                <!--<report:WgtSummaryTable DataContext="{Binding [CurentPartyInfo].Party}" />-->
+                <Border Background="LightGray" TextElement.Foreground="Black" >
+                    <report:WgtSummaryTable DataContext="{Binding [CurentPartyInfo].Party}" 
+                                            x:Name="SummaryTable" x:FieldModifier="public"/>
+                </Border>
+            </GroupBox>
+
+        </Border>
+
+        <!--Паспорта-->
+        <Border Background="{StaticResource GreyBlackBackground}"
+                Visibility="{Binding [MainWindowViewState].State.IsReportPasport, Converter={StaticResource BooleanToVisibilityConverter}}" >
+            <GroupBox >
+                <GroupBox.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" FontSize="16" Foreground="LightGreen" FontWeight="Bold"> 
+                            Паспорта
+                        </TextBlock>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" >
+
+                            <Button Grid.Column="1" Margin="3,0" ToolTip="Печать" Click="Button_Click"
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_printer}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+
+                            <Button Grid.Column="1" Margin="3,0" ToolTip="Закрыть" Command="{Binding [SetNormalView]}" 
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox.Header>
+                
+                <Border Background="LightGray" TextElement.Foreground="Black" >
+                    <FlowDocumentReader TextElement.FontSize="8" MaxZoom="300" Zoom="180" MinZoom="50"                                         
+                                        ToolBarTray.IsLocked="True" FontFamily="Microsoft Sans Serif" >
+                        <FlowDocument PageWidth="21cm" PageHeight="29.7cm" ColumnWidth="21cm" 
+                                      IsColumnWidthFlexible="False" 
+                                      ColumnRuleWidth="0" ColumnGap="0"
+                                      FontFamily="Microsoft Sans Serif" PagePadding="1.5cm,1cm,1cm,1cm"
+                                      x:Name="DocumentPasports">
+                            <FlowDocument.Resources>
+                                <Style TargetType="Paragraph">
+                                    <Setter Property="FontSize" Value="10"></Setter>
+                                    <Setter Property="FontFamily" Value="Microsoft Sans Serif"></Setter>
+                                    <Setter Property="Margin" Value="0"></Setter>
+                                </Style>
+                            </FlowDocument.Resources>
+                            <Section x:Name="SectionReportPasport" x:FieldModifier="public"  />
+                        </FlowDocument>
+                    </FlowDocumentReader>
+                </Border>
+            </GroupBox>
+
+        </Border>
+
+        <!--программатор-->
+        <Border Background="{StaticResource GreyBlackBackground}"
+                Visibility="{Binding [MainWindowViewState].State.IsProgrFlash, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <GroupBox >
+                <GroupBox.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" FontSize="16" Foreground="LightGreen" FontWeight="Bold"> 
+                            Программатор
+                        </TextBlock>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" TextElement.FontSize="14" >
+
+                            <StackPanel Orientation="Horizontal" DataContext="{Binding [Programmer][ProcessInfo]}">
+                                <TextBlock Text="Номер" Margin="3,0" />
+                                <ComboBox Text="{Binding N1, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged }"
+                                          VerticalAlignment="Center" Margin="3,0">
+                                    <ComboBoxItem>1</ComboBoxItem>
+                                    <ComboBoxItem>2</ComboBoxItem>
+                                    <ComboBoxItem>3</ComboBoxItem>
+                                    <ComboBoxItem>4</ComboBoxItem>
+                                    <ComboBoxItem>5</ComboBoxItem>
+                                    <ComboBoxItem>6</ComboBoxItem>
+                                    <ComboBoxItem>7</ComboBoxItem>
+                                    <ComboBoxItem>8</ComboBoxItem>
+                                </ComboBox>
+                                <RadioButton IsChecked="{Binding Is64, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
+                                             Margin="3,0">
+                                    64                                    
+                                </RadioButton>
+                                <RadioButton IsChecked="{Binding Is64, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolNotConverter}}"
+                                             Margin="3,0">
+                                    16
+                                </RadioButton>
+                                
+                            </StackPanel>
+
+                            <Button Margin="3,0" ToolTip="Открыть файл" Command="{Binding [OpenFileFlash]}" 
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_folder_open}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+
+                            <Button Margin="3,0" ToolTip="Сохранить файл" Command="{Binding [SaveFileFlash]}" 
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_disk}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+
+                            <Button Margin="3,0" ToolTip="Записать" Command="{Binding [WriteFlashCommand]}" 
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_download}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+                            
+                            <Button Margin="3,0" ToolTip="Считать" Command="{Binding [ReadFlashCommand]}" 
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_upload}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+
+                            <Button Margin="3,0" ToolTip="Закрыть" Command="{Binding [SetNormalView]}" 
+                                    Background="{DynamicResource AccentColorBrush}">
+                                <Rectangle Width="15"  Height="15">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox.Header>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="2*" />
+                    </Grid.RowDefinitions>
+
+                    <!--инфа-->
+                    <Grid Grid.Column="0" Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:WgtFlashInfo   Grid.Column="0" DataContext="{Binding [Programmer][Model]}" />
+
+                        
+                        
+                        <Border Grid.Column="1" BorderBrush="{StaticResource MyGreenOnGreyBlack}" BorderThickness="1,0,0,0" Padding="3">
+                            <DataGrid ItemsSource="{Binding [Programmer][TermoCalcItems]}"                              
+                                      SelectionMode="Single" Margin="5" HeadersVisibility="All" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      CanUserAddRows="False" SelectionUnit="Cell" CanUserSortColumns="False"
+                                      CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserReorderColumns="False"
+                                      AutoGenerateColumns="False"  TextElement.FontSize="14"
+                                      Style="{StaticResource MetroDataGridWithoutSelection}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="T&quot;C" Binding="{Binding T}" />
+                                    <DataGridTextColumn Header="Ток" Binding="{Binding I, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}" />
+                                    <DataGridTextColumn Header="Кч" Binding="{Binding K, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+
+
+                    </Grid>
+                    <!--график-->
+                    <Grid Grid.Column="0" Grid.Row="1" >
+                        <WindowsFormsHost x:Name="ChartFlashBytesPlaceholder" x:FieldModifier="public" />
+
+                    </Grid>
+                    <!--байты-->
+                    <DataGrid Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" TextElement.FontSize="18" TextElement.FontFamily="Consolas"
+                              AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="False"
+                              CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="False" SelectionMode="Single" SelectionUnit="Cell"
+                              DataGridCell.Selected="DataGrid_Selected"
+                              HeadersVisibility="All"
+                              ItemsSource="{Binding [Programmer][Model].Bytes, Mode=OneWay}"
+                              x:Name="DataGridFlashBytes" x:FieldModifier="public">
+                        <DataGrid.Resources>
+                            <Style TargetType="{x:Type TextBox}">
+                                <Setter Property="FontSize" Value="18" />
+                                <Setter Property="Foreground" Value="{StaticResource MyGreenOnGreyBlack}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource MyGreenOnGreyBlack}"  />
+                                <Setter Property="FontFamily" Value="Consolas"  />
+                                <Setter Property="FocusManager.FocusedElement" Value="{Binding RelativeSource={RelativeSource Self}}" />                                
+                            </Style>                            
+                        </DataGrid.Resources>
+
+                        <DataGrid.RowHeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock DataContext="{Binding Item, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridRow}}}" 
+                                           Text="{Binding Item1}" Margin="3,1" Foreground="{StaticResource MyColumnHeaderForeground}" />   
+                                
+                            </DataTemplate>
+                        </DataGrid.RowHeaderTemplate>
+
+
+                    </DataGrid>
+                    
+                    
+                    
+                </Grid>
+                
+
+            </GroupBox>
+        </Border>
+        
+        <!--статус программатора-->
+        <Popup StaysOpen="True" PopupAnimation="Fade" Placement="Center" PlacementTarget="{Binding ElementName=mainWindow}" 
+               DataContext="{Binding [Programmer][ProcessInfo] }" IsOpen="{Binding IsOpen}">
+            <Border Background="{StaticResource GreyBlackBackground}" TextElement.FontSize="16">
+                <GroupBox Header="Программатор" Padding="10" MinHeight="50"
+                          VerticalAlignment="Center" HorizontalAlignment="Center" >
+                    <StackPanel>
+                        <TextBlock Margin="3" HorizontalAlignment="Left"
+                                   Text="{Binding Text}" FontSize="18"  TextWrapping="WrapWithOverflow"
+                                   Foreground="{StaticResource MyGreenOnGreyBlack}"/>
+
+                        <ProgressBar Grid.Row="1" Margin="5" MinWidth="200" HorizontalAlignment="Stretch"
+                                     Maximum="{Binding Max}" Value="{Binding Progress}"/>
+                    </StackPanel>
+                </GroupBox>
+            </Border>
+        </Popup>
+
+        
+
+        <!--журнал -->
+        <ListBox ItemsSource="{Binding [LogJournalMessages]}" Margin="10" MaxHeight="600" VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                 ItemContainerStyle="{StaticResource MyMetroListBoxItem_DisableSelection}">
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderThickness="1" Margin="2" Padding="2"                             
+                            BorderBrush="{Binding Info.Border}">
+                        <Border.ToolTip>
+                            <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding Info.Descr}"  />
+                        </Border.ToolTip>
+                        <Grid  TextElement.FontSize="14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Info.DateTime, StringFormat='{}{0:HH:mm:ss}'}" VerticalAlignment="Top" Margin="2" Foreground="LightGreen" 
+                                       FontSize="16"/>
+                            <ScrollViewer MaxHeight="250" Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{Binding Info.Text}" Foreground="{Binding Info.Foreground}" TextWrapping="WrapWithOverflow" Margin="2"  
+                                           MaxWidth="500" FontSize="16" />
+                            </ScrollViewer>
+
+
+                            <Button Width="30" Height="30" Background="{DynamicResource AccentColorBrush}"
+                                    Grid.Column="2" Margin="10,0,0,0" VerticalAlignment="Top" Command="{Binding Remove}"
+                                    ToolTip="Закрыть">
+                                <Rectangle Width="10" Height="10">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        
+
+        <!--ввод коэффициента чувствительности-->
+        <Popup PopupAnimation="Fade" Placement="Center" PlacementTarget="{Binding ElementName=mainWindow}" 
+               x:Name="PopupAlchemySetKsnsT" StaysOpen="False">
+            <Border Background="{StaticResource GreyBlackBackground}">
+                <GroupBox Header="Ввод Кч на температуре" Padding="10" MinHeight="50" 
+                          VerticalAlignment="Center" HorizontalAlignment="Center" >
+                    <StackPanel >
+                        <StackPanel Orientation="Horizontal" >
+                            <StackPanel>
+                                <ComboBox ItemsSource="{Binding [AlchemyKsnsTemperatures]}" Text="{Binding [AlchemyKsnsTInput].What, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
+                                      FontSize="18" Foreground="{StaticResource MyGreenOnGreyBlack}"
+                                      Margin="5"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Kч=" FontSize="18" Margin="5"
+                                           Foreground="{StaticResource MyGreenOnGreyBlack}"/>
+                                    <TextBox Text="{Binding [AlchemyKsnsTInput].Value, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
+                                         FontSize="18" Width="100" Margin="5"
+                                         Foreground="{StaticResource MyGreenOnGreyBlack}"/>
+
+                                </StackPanel>
+                                
+                            </StackPanel>
+                            <Button Background="{DynamicResource AccentColorBrush}" Click="Button_Click_3"
+                                Grid.Column="2" Margin="10" VerticalAlignment="Top" Command="{Binding [AlchemySetKsnsT]}"
+                                ToolTip="Установить Кч">
+                                <Rectangle Width="20" Height="20">
+                                    <Rectangle.Fill>
+                                        <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_check}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button>
+                        </StackPanel>
+                        <CheckBox IsChecked="{Binding [AlchemyKsnsTInput].NeedCalcIfon_20, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                                  Foreground="{StaticResource MyGreenOnGreyBlack}"  
+                                  
+                                  HorizontalAlignment="Left"
+                                  Visibility="{Binding [AlchemyKsnsTInput].CheckboxNeedCalcIfon_20Visible , Converter={StaticResource BooleanToVisibilityConverter}}" >
+                            <CheckBox.Content>
+                                <TextBlock Height="Auto" TextWrapping="WrapWithOverflow" FontSize="16" Width="170">
+                                        Расчитать фоновый ток для -20"С
+                                </TextBlock>
+                            </CheckBox.Content>
+                        </CheckBox>
+                    </StackPanel>
+                    
+                </GroupBox>
+            </Border>
+        </Popup>
+
+
+        <!--о программе-->
+        <Popup PopupAnimation="Fade" Placement="Center" PlacementTarget="{Binding ElementName=mainWindow}" 
+               x:Name="PopupAbout" StaysOpen="False"  >
+            <Border Background="{StaticResource GreyBlackBackground}"  >
+                <Border.Resources>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="FontSize" Value="18" />
+                        <Setter Property="Foreground" Value="{StaticResource MyGreenOnGreyBlack}" />
+                        <Setter Property="FontFamily" Value="Consolas"  />
+                        <Setter Property="Height" Value="auto" />
+                        <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+
+                    </Style>
+                </Border.Resources>
+                
+                <GroupBox Header="О программе" Padding="10" MinHeight="50"  
+                          VerticalAlignment="Center" HorizontalAlignment="Center" >
+                    <StackPanel MaxWidth="400" >
+                        <TextBlock  Margin="10,0" >
+                            Программа для автаматизировааного стенда ЭН8800-5600 для настройки ЭХЯ ИБЯЛ.418425.035-... в лаборатрории № 73 отдела № 6 ФГУП «СПО «Аналитприбор»
+                        </TextBlock>
+
+                        <TextBlock  Margin="10"
+                                   Foreground="LightSkyBlue">
+                            Версия
+                        </TextBlock>
+                        <TextBlock Margin="10,0"
+                                   Foreground="LightSkyBlue" Text="{Binding [AppVersion]}" >
+                            
+                        </TextBlock>
+                    </StackPanel>
+                </GroupBox>
+            </Border>
+        </Popup>
+
+    </Grid>
+    
+    
+</Controls:MetroWindow>

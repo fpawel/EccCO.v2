@@ -1,0 +1,109 @@
+﻿<UserControl x:Class="UI.Reports.ProductSummaryTableRow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:local="clr-namespace:UI" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="..\Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="Paragraph">
+                <Setter Property="FontSize" Value="10"></Setter>
+            </Style>
+        </ResourceDictionary>
+
+
+    </UserControl.Resources>
+    <FlowDocument x:Name="Document" x:FieldModifier="public" PageWidth="21cm" PageHeight="29.7cm" ColumnWidth="21cm" 
+                    IsColumnWidthFlexible="False" 
+                    ColumnRuleWidth="0" ColumnGap="0"
+                    FontFamily="Microsoft Sans Serif"
+                    PagePadding="1.5cm,1cm,1cm,1cm">
+        
+
+        <Section >
+            <Section.Resources>
+                <Style TargetType="Paragraph">
+                    <Setter Property="FontSize" Value="14"></Setter>
+                    <Setter Property="FontFamily" Value="Microsoft Sans Serif"></Setter>
+                </Style>
+
+                <local:ForegroundConverter1 x:Key="ForegroundConverter1" />
+                <local:ForegroundConverter2 x:Key="ForegroundConverter2" />
+
+            </Section.Resources>
+            <Table>
+                <TableRowGroup x:Name="Rows1" x:FieldModifier="public">
+                    <TableRow x:Name="Row1" x:FieldModifier="public">
+                        <TableCell>
+                            <Paragraph>
+                                <Run x:Name="RunNumber" x:FieldModifier="public" />
+                            </Paragraph>
+                        </TableCell>
+                        <TableCell>
+                            <Paragraph>
+                                <Run Text="{Binding Product.Serial, Mode=OneWay, Converter={StaticResource FSharpIntOptionConverter}}" />
+                            </Paragraph>
+                        </TableCell>
+                        <TableCell Background="{Binding InfoExt.IsValidIfon, Converter={StaticResource ReportBackgroundConverter2}}">
+                            <Paragraph >
+                                <Run Text="{Binding Product.Ifon, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}" 
+                                     Foreground="{Binding InfoExt.IsValidIfon, Converter={StaticResource ReportForegroundConverter1}}" />
+                            </Paragraph>
+                        </TableCell>
+                        <TableCell Background="{Binding InfoExt.IsValidDi, Converter={StaticResource ReportBackgroundConverter2}}">
+                            <Paragraph>
+                                <Run Text="{Binding InfoExt.Dfon, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}"
+                                     Foreground="{Binding InfoExt.IsValidDi, Converter={StaticResource ReportForegroundConverter1}}"  />
+                            </Paragraph>
+                        </TableCell>
+                        <TableCell Background="{Binding InfoExt.IsValidDt, Converter={StaticResource ReportBackgroundConverter2}}">
+                            <Paragraph>
+                                <Run Text="{Binding InfoExt.Dt, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}"
+                                     Foreground="{Binding InfoExt.IsValidDt, Converter={StaticResource ReportForegroundConverter1}}"  />
+                            </Paragraph>
+                        </TableCell>
+
+                        <TableCell Background="{Binding InfoExt.IsValidKsns, Converter={StaticResource ReportBackgroundConverter2}}" >
+                            <Paragraph>
+                                <Run Text="{Binding InfoExt.Ksns, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}"
+                                     Foreground="{Binding InfoExt.IsValidKsns, Converter={StaticResource ReportForegroundConverter1}}" />
+                            </Paragraph>
+                        </TableCell>
+                        <TableCell Background="{Binding InfoExt.IsValidKsns50, Converter={StaticResource ReportBackgroundConverter2}}" >
+                            <Paragraph>
+                                <Run Text="{Binding InfoExt.Ksns50, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}"
+                                     Foreground="{Binding InfoExt.IsValidKsns50, Converter={StaticResource ReportForegroundConverter1}}" />
+                            </Paragraph>
+                        </TableCell>
+
+                        <TableCell Background="{Binding InfoExt.IsValidDn, Converter={StaticResource ReportBackgroundConverter2}}">
+                            <Paragraph>
+                                <Run Text="{Binding InfoExt.Dn, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}"
+                                     Foreground="{Binding InfoExt.IsValidDn, Converter={StaticResource ReportForegroundConverter1}}" />
+                            </Paragraph>
+                        </TableCell>
+
+                        <TableCell>
+                            <Paragraph>
+                                <Run Text="{Binding InfoExt.Uk.Item1, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}" />
+                            </Paragraph>
+                        </TableCell>
+                        <TableCell>
+                            <Paragraph>
+                                <Run Text="{Binding InfoExt.Uk.Item2, Mode=OneWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}}" />
+                            </Paragraph>
+                        </TableCell>
+
+                    </TableRow>
+                </TableRowGroup>
+            </Table>
+            
+        </Section>
+    </FlowDocument>
+</UserControl>

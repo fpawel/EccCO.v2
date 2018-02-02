@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="UI.WgtTermoPoints"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary1.xaml" />
+            </ResourceDictionary.MergedDictionaries>            
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <DataGrid ItemsSource="{Binding DataContext, RelativeSource={RelativeSource Self}}"                              
+              SelectionMode="Single" Margin="5" HeadersVisibility="All" 
+              ScrollViewer.VerticalScrollBarVisibility="Auto"
+              CanUserAddRows="False" SelectionUnit="Cell" CanUserSortColumns="False"
+              AutoGenerateColumns="False"  TextElement.FontSize="14">
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="T&quot;C" Binding="{Binding Item.T, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+            <DataGridTextColumn Header="Ток" Binding="{Binding Item.I, Mode=TwoWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+            <DataGridTextColumn Header="Кч" Binding="{Binding Item.K, Mode=TwoWay, Converter={StaticResource FSharpDecimalOptionConverter}, StringFormat={}{0:#0.0##}, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+
+            <DataGridTemplateColumn CanUserResize="False">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button Command="{Binding Remove}" ToolTip="Удалить этоту строку из таблицы"
+                                                        Margin="1" Padding="3"
+                                                        Background="{DynamicResource AccentColorBrush}">
+                            <Rectangle Width="15"  Height="15" >
+                                <Rectangle.Fill>
+                                    <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_close}" />
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Button>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>

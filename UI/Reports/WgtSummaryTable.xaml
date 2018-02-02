@@ -1,0 +1,220 @@
+﻿<UserControl x:Class="UI.Reports.WgtSummaryTable"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             xmlns:gl="clr-namespace:System.Globalization;assembly=mscorlib"
+             Background="LightGray"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <FlowDocumentReader TextElement.FontSize="8" MaxZoom="300" Zoom="180" MinZoom="50"
+                        ToolBarTray.IsLocked="True" FontFamily="Microsoft Sans Serif" >
+        <FlowDocument x:Name="Document1" x:FieldModifier="public" PageWidth="21cm" PageHeight="29.7cm" ColumnWidth="21cm" 
+                          IsColumnWidthFlexible="False" 
+                          ColumnRuleWidth="0" ColumnGap="0"
+                          FontFamily="Microsoft Sans Serif"
+                          PagePadding="1.5cm,1cm,1cm,1cm">
+            <FlowDocument.Resources>
+                <Style TargetType="Paragraph">
+                    <Setter Property="FontSize" Value="10"></Setter>
+                </Style>
+            </FlowDocument.Resources>
+
+            <Section >
+                <Section.Resources>
+                    <Style TargetType="Paragraph">
+                        <Setter Property="FontSize" Value="14"></Setter>
+                        <Setter Property="FontFamily" Value="Microsoft Sans Serif"></Setter>
+                    </Style>
+                </Section.Resources>
+                <Paragraph FontWeight="Bold" FontSize="18">
+                    Итоговая таблица настройки электро-химических ячеек в Лаборатории № 73 ФГУП СПО "Аналитприбор"
+                </Paragraph>
+                <Table>
+                    <TableRowGroup>
+                        <TableRow>
+
+                            <TableCell>
+                                <Paragraph>Партия</Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>
+                                    <Bold>
+                                        <Run Text="{Binding Party.Name, Mode=OneWay}" />
+                                    </Bold>
+                                </Paragraph>
+                            </TableCell>
+
+                            <TableCell>
+                                <Paragraph>Количество</Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>
+                                    <Bold>
+                                        <Run x:Name="RunCount" x:FieldModifier="public" />
+                                    </Bold>
+                                </Paragraph>
+                            </TableCell>
+
+                            <TableCell>
+                                <Paragraph>Дата</Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>
+                                    <Bold>
+                                        <Run Text="{Binding Source={x:Static sys:DateTime.Now},StringFormat='{}{0:dd MMMM yyyy}', Mode=OneWay, ConverterCulture={x:Static gl:CultureInfo.InstalledUICulture}}"></Run>
+                                    </Bold>
+                                </Paragraph>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>
+                                <Paragraph>Исполнение</Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>
+                                    <Bold>
+                                        <Run Text="{Binding ProductType.Name, Mode=OneWay}" />
+                                    </Bold>
+                                </Paragraph>
+                            </TableCell>
+
+                            <TableCell>
+                                <Paragraph>Компонент</Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>
+                                    <Bold>
+                                        <Run Text="{Binding ProductType.Gas, Mode=OneWay}" />
+                                    </Bold>
+                                </Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>Диапазон</Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>
+                                    <Bold>
+                                        <Run Text="{Binding ProductType.Range, Mode=OneWay}" />
+                                    </Bold>
+                                    <Run Text="{Binding ProductType.Units, Mode=OneWay}" />
+                                </Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>ПГС</Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>
+                                    <Bold>
+                                        <Run Text="{Binding Party.PGS3, Mode=OneWay}" />
+                                    </Bold>
+                                    <Run Text="{Binding ProductType.Units, Mode=OneWay}" />
+                                </Paragraph>
+                            </TableCell>
+                        </TableRow>
+                    </TableRowGroup>
+                </Table>
+                <Table>
+                    <Table.Resources>
+                        <Style TargetType="TableCell" >
+                            <Setter Property="BorderBrush" Value="Gray" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="Padding" Value="2" />
+                        </Style>
+                    </Table.Resources>
+                    <Table.Columns>
+                        <TableColumn />
+                        <TableColumn />
+                        <TableColumn />
+                        <TableColumn />
+                        <TableColumn />
+                        <TableColumn />
+                        <TableColumn />
+                        <TableColumn />
+                        <TableColumn />
+                        <TableColumn />
+                    </Table.Columns>
+                    <TableRowGroup>
+                        <TableRowGroup.Resources>
+                            <Style TargetType="Paragraph">
+                                <Setter Property="TextAlignment" Value="Center"></Setter>
+                                <Setter Property="FontWeight" Value="Bold"></Setter>
+                                <Setter Property="FontFamily" Value="Palatino Linotype" />
+                                <Setter Property="FontSize" Value="12" />
+                            </Style>
+                        </TableRowGroup.Resources>
+                        <TableRow>
+                            <TableCell RowSpan="2">
+                                <Paragraph>№ п/п</Paragraph>
+                            </TableCell>
+                            <TableCell RowSpan="2" FontSize="12">
+                                <Paragraph>Заводской номер</Paragraph>
+                            </TableCell>
+                            <TableCell RowSpan="2">
+                                <Paragraph >
+                                    I
+                                    <Run Typography.Variants="Subscript" FontFamily="Palatino Linotype">fon</Run> , мкА
+                                </Paragraph>
+                            </TableCell>
+                            <TableCell RowSpan="2">
+                                <Paragraph >
+                                    <Run FontFamily="Symbol">D</Run>
+                                    I
+                                    <Run Typography.Variants="Subscript" FontFamily="Palatino Linotype">fon</Run> , мкА
+                                </Paragraph>
+                            </TableCell>
+                            <TableCell RowSpan="2">
+                                <Paragraph >
+                                    <Run FontFamily="Symbol">D</Run>
+                                    I
+                                    <Run Typography.Variants="Subscript" FontFamily="Palatino Linotype">t</Run> , мкА
+                                </Paragraph>
+                            </TableCell>
+                            <TableCell RowSpan="2">
+                                <Paragraph >
+                                    К
+                                    <Run Typography.Variants="Subscript" FontFamily="Palatino Linotype">s</Run>
+                                    , мкА/мг/м
+                                    <Run Typography.Variants="Superscript" FontFamily="Palatino Linotype">3</Run>
+                                </Paragraph>
+                            </TableCell>
+                            <TableCell RowSpan="2">
+                                <Paragraph >
+                                    К
+                                    <Run Typography.Variants="Subscript" FontFamily="Palatino Linotype">s</Run>
+                                    50
+                                    <Run Typography.Variants="Superscript" FontFamily="Palatino Linotype">o</Run> C, %
+                                </Paragraph>
+                            </TableCell>
+                            <TableCell RowSpan="2" >
+                                <Paragraph>
+                                    <Run FontFamily="Symbol">D</Run>
+                                    <Run Typography.Variants="Subscript" FontFamily="Palatino Linotype">nei</Run>
+                                    , мг/м
+                                    <Run Typography.Variants="Superscript" FontFamily="Palatino Linotype">3</Run>
+                                </Paragraph>
+                            </TableCell>
+                            <TableCell ColumnSpan="2"  >
+                                <Paragraph TextAlignment="Center">
+                                    U
+                                    <Run Typography.Variants="Subscript" FontFamily="Palatino Linotype">k</Run>
+                                    , мВ
+                                </Paragraph>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>
+                                <Paragraph>СОУ</Paragraph>
+                            </TableCell>
+                            <TableCell>
+                                <Paragraph>СТГ</Paragraph>
+                            </TableCell>
+                        </TableRow>
+                    </TableRowGroup>
+                    <TableRowGroup x:Name="RowGroupSummaryTableContent" x:FieldModifier="public" />
+                </Table>
+            </Section>
+        </FlowDocument>
+    </FlowDocumentReader>
+</UserControl>
