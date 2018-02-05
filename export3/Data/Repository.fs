@@ -30,80 +30,59 @@ type Id = string
         |> leftSome
 
     module Path = 
-        let data = 
-            let x = Path.Combine( exepath, "Batches" ) 
+        let data rootPath = 
+            let x = Path.Combine( rootPath, "Batches" ) 
             if Directory.Exists x |> not then 
                 Directory.CreateDirectory x |> ignore
             x
-        let baddata = lazy (                
-            let x = Path.Combine( exepath, "__CORRUPTED__" ) 
-            if Directory.Exists x |> not then 
-                Directory.CreateDirectory x |> ignore
-            x )
-            
-
-        let batchFolder canCreate id (dt:DateTime)  = 
+        
+        let batchFolder rootPath canCreate id (dt:DateTime)  = 
             let (~%%) = string
             let month = dt.ToString("MMM", System.Globalization.CultureInfo.InvariantCulture)
-            let path = Path.Combine(data, %% dt.Year, sprintf "%d-%s" dt.Month month, %% dt.Day, id )
+            let path = Path.Combine(data rootPath, %% dt.Year, sprintf "%d-%s" dt.Month month, %% dt.Day, id )
             if canCreate then
                 createDirectory path
             { FileName = path }
 
-        let batchFileName canCreate id dt  =             
-            { FileName = Path.Combine( (batchFolder canCreate id dt).FileName, sprintf "%s.batch"  id ) }
+        let batchFileName rootPath canCreate id dt  =             
+            { FileName = Path.Combine( (batchFolder rootPath canCreate id dt).FileName, sprintf "%s.batch"  id ) }
             
-    let moveCorrupted (src:string) = 
-        let filename = Path.GetFileName src
-        printfn "Файл %s повреждён!" filename 
-        try 
-            let dest = ( Path.Combine(Path.baddata.Force(), filename) )
-            if File.Exists dest then
-                File.Delete dest |> ignore
-            File.Move( src, dest ) 
-        with e ->
-            printfn  "Ошибка переноса файла %s, %A" filename e.Message 
-            printfn  "%A" e
-
-    let getBatchesInfo() =
-        let files = Directory.GetFiles( Path.data, "*.batch", SearchOption.AllDirectories)
+    let getBatchesInfo( rootPath ) =
+        let files = Directory.GetFiles( Path.data rootPath, "*.batch", SearchOption.AllDirectories)
         let r = 
             [   for filename in files do
                     match   readFile {FileName=filename} FSharpBin.deserialize<BatchInfo>  with
-                    | Left x ->  moveCorrupted filename                    
+                    | Left x ->  ()                  
                     | Right x -> yield x ]   
         r
 
 
 module Path =
-    let year year = 
-        let x = Path.batchFolder false "-" (DateTime(year,1,1) )
+    let year rootPath year = 
+        let x = Path.batchFolder rootPath false "-" (DateTime(year ,1,1) )
         x.FileName 
         |> Path.GetDirectoryName
         |> Path.GetDirectoryName
         |> Path.GetDirectoryName
-    let month year month = 
-        let x = Path.batchFolder false "-" (DateTime(year,month,1) )
+    let month rootPath year month = 
+        let x = Path.batchFolder rootPath false "-" (DateTime(year,month,1) )
         x.FileName 
         |> Path.GetDirectoryName
         |> Path.GetDirectoryName
 
-    let day year month day = 
-        let x = Path.batchFolder false "-" (DateTime(year,month,day) )
+    let day rootPath year month day = 
+        let x = Path.batchFolder rootPath false "-" (DateTime(year,month,day) )
         x.FileName 
         |> Path.GetDirectoryName
 
-    let batch id dateTime = 
-        (Path.batchFolder false id dateTime).FileName
+    let batch rootPath id dateTime = 
+        (Path.batchFolder rootPath false id dateTime).FileName
   
 [<AutoOpen>]
 module private Helpers1 = 
-    let batchesInfo = ref ( getBatchesInfo() )
-
-    let load id dt =
-        let fileName = Path.batchFileName false id dt
+    let load rootPath id dt =
+        let fileName = Path.batchFileName rootPath false id dt
         if File.Exists fileName.FileName |> not then
-            batchesInfo := !batchesInfo |> List.filter( fun y -> y.Id <> id)
             Left ("не найден файл " + fileName.FileName)
         else
             readFile fileName <| fun reader ->
@@ -116,71 +95,26 @@ module private Helpers1 =
                 
                 
 
-    let save batch = 
-        let batchInfo = BatchInfo.creteNew batch
-        writeFile (Path.batchFileName true batchInfo.Id batchInfo.Date) <| fun writer ->
-            FSharpBin.serialize writer batch
-            batchesInfo := !batchesInfo |> List.map( fun x -> if x.Id=batch.Id then batchInfo else x)
-
-    let tryGetBatchInfo id = 
-        match !batchesInfo |> List.tryFind( fun x -> x.Id=id) with
+    let tryGetBatchInfo rootPath id = 
+        match getBatchesInfo rootPath |> List.tryFind( fun x -> x.Id=id) with
         | None -> None
         | Some batchInfo -> Some batchInfo
 
-    let updateBatchInfo batch = 
-        batchesInfo := (DataModel.BatchInfo.creteNew batch) :: ( !batchesInfo |> List.filter( fun y -> y.Id <> batch.Id) )
-
-
     
-let removeByIds removeIds =
-    let xs1 = !batchesInfo |> List.map( fun x -> x.Id, x)
-    let existed = Map.ofList xs1
-    let existedIds = xs1 |> List.map fst |> Set.ofList
-    batchesInfo :=
-        Set.difference existedIds removeIds
-        |> Seq.map( fun id -> existed.[id])
-        |> Seq.toList
             
-let save batch =              
-    match save batch with
-    | None -> updateBatchInfo batch                
-    | Some e -> 
-        failwithf "Не удалось сохраниться!\n\n%A\n\n%A" ( BatchInfo.creteNew batch) e
 
 
-
-let createNew() =  
-    let b = DataModel.Batch.createNew()
-    save b
-    b
-
-let remove id =
-    match tryGetBatchInfo id with
-    | None -> Some ("удаляемая партия не найдена - " + id)
-    | Some batchInfo ->
-        let filename = Path.batchFileName false id batchInfo.Date
-        if File.Exists filename.FileName |>  not then Some ("удаляемая партия не найдена - " + filename.FileName) else
-        try            
-            Directory.Delete( (Path.batchFolder false id batchInfo.Date).FileName, true )
-            batchesInfo := !batchesInfo |> List.filter( fun y -> y.Id <> id)
-            None
-        with e ->
-            Some e.Message
-
-let getInfoList () = 
-    List.rev !batchesInfo
+let getInfoList rootPath = 
+    List.rev ( getBatchesInfo rootPath)
 
 
-let get id =
-    match tryGetBatchInfo id with
+let get rootPath id =
+    match tryGetBatchInfo rootPath id with
     | None -> Left "партия не найдена"
     | Some batchInfo ->
-        load id batchInfo.Date 
+        load rootPath id batchInfo.Date 
 
-let getLast () =
-    if !batchesInfo |> List.isEmpty then Left "список партий пуст" else
-    let batchInfo = !batchesInfo |> List.maxBy ( fun x -> x.Date ) 
-    load batchInfo.Id batchInfo.Date 
+
 
 
    
