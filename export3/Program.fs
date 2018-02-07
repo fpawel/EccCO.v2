@@ -69,7 +69,7 @@ VALUES
     if p.Flash |> Array.exists( (<>) 0xffuy) then 
         cmd.Parameters.Add("@flash", System.Data.DbType.Binary, p.Flash.Length).Value <- p.Flash
     else 
-        cmd.Parameters.AddWithValue("@flash", "NULL") |> ignore   
+        cmd.Parameters.AddWithValue("@flash", null) |> ignore   
             
     cmd.ExecuteNonQuery() |> ignore     
     
