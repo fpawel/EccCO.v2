@@ -226,7 +226,10 @@ let createNewPartyViewModel (party : Batch) =
         subscribePropertyChanged p.Product <| fun e ->
             if e.PropertyName="IsCustomTermo" then 
                 if  p.Product.IsCustomTermo && p.Product.CustomTermo.IsEmpty then
-                        match p.InfoExt.ProductType.TermoPoints with
+                        let xs = 
+                            p.InfoExt.ProductType.TermoPoints
+                            |> List.map(fun x -> CalculateTermo.Item.create1 x.T x.I x.K  )
+                        match xs with
                         | [] -> Alchemy.getProductTermoPointsOriginal party p.Product 
                         | x -> x
                         |> List.iter ( TermoCalcItem.createNew >> p.TermoCalcItems.Add )
