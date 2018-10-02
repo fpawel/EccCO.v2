@@ -101,6 +101,7 @@ module private Helpers1 =
 let getInfoList rootPath = 
     List.rev ( getBatchesInfo rootPath)
 
+let loadParty rootPath id date = load rootPath id date
 
 let get rootPath id =
     match tryGetBatchInfo rootPath id with

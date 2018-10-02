@@ -2,6 +2,9 @@
 open System.Collections.Generic
 open System.Data.SQLite
 open System.Data
+open System.IO
+open System.Diagnostics
+open System.IO
 
 let cmd_prmo (cmd : SQLiteCommand) (t:DbType) prm (v:'T option) =        
         match v with
@@ -13,40 +16,63 @@ let cmd_prmo (cmd : SQLiteCommand) (t:DbType) prm (v:'T option) =
 let cmd_deco cmd = 
         cmd_prmo cmd DbType.Decimal
 
-
 type Ctx = 
     {   conn : SQLiteConnection
         exported_parties:Set<string>
         old_parties : DataModel.BatchInfo list
-        repository_path: string
     }
 
     member x.migrate() = 
-        printfn "exported parties: %A" x.exported_parties.Count
-        printfn "start export"
-        let count = x.old_parties.Length
-        for i = 0 to count - 1 do
-            let old_party = x.old_parties.[i]
-            let startTime = DateTime.Now
-            x.export_party old_party.Id    
-            printfn "%A: %A: %s, %A, №%d из %d, %d%s" 
-                    DateTime.Now old_party.Date old_party.Id (DateTime.Now - startTime) (i+1) count
-                    (int <| Math.Round ((float i / float count) * 100.)) "%"                  
-        x.conn.Close()
 
-    member x.export_party(old_party_id:DataModel.Id)  = 
+        let cmd = new SQLiteCommand(x.conn, CommandText = "BEGIN TRANSACTION;")
+        cmd.ExecuteNonQuery() |> ignore
 
-        if Set.contains old_party_id x.exported_parties then () else
+        let startTime = DateTime.Now
+    
+        let percent  = 
+            let count = x.old_parties.Length
+            fun i ->                
+                ((float i / float count) * 100.) |> round |> int
+
+        let resetCursor =             
+            let conx, cony = Console.CursorLeft, Console.CursorTop
+            fun () ->
+                let conx2 = Console.CursorLeft
+                Console.SetCursorPosition(conx, cony)
+                printf "%s" (String(' ', conx2 - conx + 1))
+                Console.SetCursorPosition(conx, cony)            
+
+        x.old_parties
+        |> List.iteri(fun i old_party ->
+            
+            let s = sprintf "%d %d%s %A  " (i+1) ( percent i) "%" old_party.Date
+
+            if Set.contains old_party.Id x.exported_parties then
+                resetCursor()
+                printf "%s: skip" s
+            else
+                x.export_party old_party.Id  old_party.Date
+                resetCursor()
+                printf "%s" s 
+            )         
+        cmd.CommandText <- "COMMIT;"
+        cmd.ExecuteNonQuery() |> ignore
+        printfn ""
+        printfn "total time: %A" (DateTime.Now - startTime)
+
+        
+
+    member x.export_party old_party_id old_party_date = 
 
         let old_party = 
-            match Repository.get x.repository_path old_party_id with
+            match Repository.loadParty Environment.CurrentDirectory old_party_id old_party_date with
             | Err err -> failwith err 
             | Ok x -> x
-    
+        
         let cmd = new SQLiteCommand(x.conn)
     
         cmd.CommandText <- """
-            BEGIN TRANSACTION;
+            
             INSERT INTO party (created_at, old_party_id, product_type_name, conc1, conc2, conc3, note) 
                 VALUES
                     (@created_at, @old_party_id, @product_type_name, @conc1, @conc2, @conc3, @note);
@@ -69,10 +95,9 @@ type Ctx =
             let old_product = old_party.Products.[place]
             x.export_product party_id place  old_product  old_party 
         
-        let cmd = new SQLiteCommand(x.conn)
-        cmd.CommandText <- "COMMIT;"
-        let _ = cmd.ExecuteNonQuery()
-        ()
+        
+            
+            
 
     member x.export_product 
         (party_id:int64)
@@ -101,7 +126,7 @@ type Ctx =
                     SELECT last_insert_rowid();"""
 
         cmd.Parameters.Add("@party_id", DbType.Int64).Value <- party_id
-        if old_party.Products |> List.exists ( fun x -> x.Id <> old_product.Id && x.Serial = Some serial) then
+        if old_party.Products |> List.exists ( fun x -> x.N < old_product.N && x.Serial = Some serial) then
             cmd.Parameters.Add("@serial", DbType.Object).Value <- null        
         else
             cmd.Parameters.Add("@serial", DbType.Int32).Value <- serial    
@@ -149,25 +174,38 @@ type Ctx =
             cmd_deco cmd "@k_sens" k
             cmd.ExecuteNonQuery() |> ignore )
         
-let newCtx() = 
+[<EntryPoint>]
+let main argv = 
     //let fileName = @"E:\Program Data\Аналитприбор\elchese\elchese.sqlite"
     //let repository_path = @"E:\User\Projects\VS2018\EccCO.v2\App\bin\Release" 
+    // @"C:\Users\fpawel\Documents\Visual Studio 2015\Projects\Analit\EccCO.v2\App\bin\Release" 
 
-    let fileName = @"C:\Users\fpawel\AppData\Roaming\Аналитприбор\elchese\elchese.sqlite"
-    let repository_path = @"C:\Users\fpawel\Documents\Visual Studio 2015\Projects\Analit\EccCO.v2\App\bin\Release" 
+    let folderName = 
+        let mutable s = Environment.GetEnvironmentVariable("MYAPPDATA") 
+        if s = "" then
+            s <- Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+        Path.Combine(s, "Аналитприбор", "elchese")
 
+    let fileName = Path.Combine(folderName, "elchese.sqlite" )    
+
+    let fileExitst = File.Exists fileName
+
+    printfn "database: %s" fileName  
+    if not fileExitst then
+        printfn "create sqlite database file"
+        SQLiteConnection.CreateFile fileName
+        
     let conn = new SQLiteConnection( sprintf "Data Source=%s; Version=3;" fileName)
     try 
         conn.Open() 
     with e ->
         failwith e.Message        
-    printfn "open %s: ok" fileName  
+    
+    printfn "%A: initialize sqlite database" DateTime.Now
+    let cmd = new SQLiteCommand(conn, CommandText = initdb.sql)
+    cmd.ExecuteNonQuery() |> ignore
 
-    use cmd = new SQLiteCommand(conn)
-    cmd.CommandText <- "PRAGMA foreign_keys = ON; PRAGMA encoding = 'UTF-8';"
-    cmd.ExecuteNonQuery() |> ignore 
-
-    use cmd = new SQLiteCommand(conn)
+    printfn "%A: read exported parties" DateTime.Now
     cmd.CommandText <- "SELECT old_party_id FROM party;"
     use r = cmd.ExecuteReader()    
     let exported_parties =
@@ -175,22 +213,28 @@ let newCtx() =
             while r.Read() do         
                 yield r.["old_party_id"] :?> string            
         } |> Set.ofSeq
-        
 
+    printfn "exported parties: %d" exported_parties.Count
+    
+    printfn "%A: read old parties" DateTime.Now
+    let old_parties = 
+        Repository.getInfoList Environment.CurrentDirectory
+        |> List.sortBy(fun x -> x.Date.Ticks * (-1L))
+    printfn "%A: old parties: %d" DateTime.Now old_parties.Length 
+
+    printfn "%A: start export" DateTime.Now
+        
+    
     {   conn = conn
         exported_parties = exported_parties
-        old_parties = 
-            Repository.getInfoList repository_path
-            |> List.sortBy(fun x -> x.Date.Ticks * (-1L))
-        repository_path = repository_path 
-    }
-    
-[<EntryPoint>]
-let main argv = 
-    let ctx = newCtx()
-    ctx.migrate()
+        old_parties = old_parties
+    }.migrate()
+
+    conn.Close()
+
+    Process.Start(folderName) |> ignore
     printfn "Press any key..."
     let _ = Console.ReadKey()
     printfn "Buy!"
-    printfn "%A" argv
-    0 // return an integer exit code
+    0
+    
