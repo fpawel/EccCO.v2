@@ -101,14 +101,14 @@ CREATE TABLE IF NOT EXISTS product_temperature_current_k_sens (
     ON DELETE CASCADE
 );
 
-CREATE VIEW IF NOT EXISTS party_year_month_day AS
-  SELECT DISTINCT cast(strftime('%Y', created_at) AS INTEGER) AS year,
-                  cast(strftime('%m', created_at) AS INTEGER) AS month,
-                  cast(strftime('%d', created_at) AS INTEGER) AS day
-  FROM party
-  ORDER BY created_at;
 
-CREATE VIEW IF NOT EXISTS current_party AS
+CREATE VIEW IF NOT EXISTS party_info AS
+  SELECT *, cast(strftime('%Y', created_at) AS INTEGER)                                  AS year,
+            cast(strftime('%m', created_at) AS INTEGER)                                  AS month,
+            cast(strftime('%d', created_at) AS INTEGER)                                  AS day
+  FROM party;
+
+CREATE VIEW IF NOT EXISTS last_party AS
   SELECT *
   FROM party
   ORDER BY created_at DESC
@@ -160,24 +160,24 @@ CREATE VIEW IF NOT EXISTS product_info AS
          lc64,
          points_method,
 
-         i_f_minus20,
-         q1.i_f_plus20,
-         i_f_plus50,
-         i_s_minus20,
-         i_s_plus20,
-         i_s_plus50,
+         round(i_f_minus20,3) AS i_f_minus20,
+         round(q1.i_f_plus20,3) AS i_f_plus20,
+         round(i_f_plus50,3) AS i_f_plus50,
+         round(i_s_minus20,3) AS i_s_minus20,
+         round(i_s_plus20,3) AS i_s_plus20,
+         round(i_s_plus50,3) AS i_s_plus50,
 
          party.conc1,
          party.conc3,
-         product.not_measured,
+         round(product.not_measured,3) AS not_measured,
 
 
-         product.i13,
+         round(product.i13,3) AS i13,
 
-         i24,
-         i35,
-         i26,
-         i17,
+         round(i24,3) AS i24,
+         round(i35,3) AS i35,
+         round(i26,3) AS i26,
+         round(i17,3) AS i17,
          flash NOT NULL AS firmware,
 
          k_sens20,
@@ -303,6 +303,5 @@ VALUES ('035', '035', 'CO', 'мг/м3', 200, 0.1626, 18, 0, 3, NULL, NULL, NULL,
 
 
 DELETE FROM party WHERE NOT EXISTS(SELECT product_id FROM product WHERE party.party_id = product.party_id);
-
 """
 
