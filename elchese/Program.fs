@@ -1,10 +1,8 @@
 ﻿open System
-open System.Collections.Generic
 open System.Data.SQLite
 open System.Data
 open System.IO
 open System.Diagnostics
-open System.IO
 
 let cmd_prmo (cmd : SQLiteCommand) (t:DbType) prm (v:'T option) =        
         match v with
@@ -173,9 +171,37 @@ type Ctx =
             cmd_deco cmd "@current" i
             cmd_deco cmd "@k_sens" k
             cmd.ExecuteNonQuery() |> ignore )
+
+open FSharp.Data.Sql
+
+let [<Literal>] resolutionPath = @"C:\Users\fpawel\AppData\Roaming\Аналитприбор\elchese\elchese.sqlite" 
+let [<Literal>] connectionString = "Data Source=" + resolutionPath
+
+// create a type alias with the connection string and database vendor settings
+type sql = SqlDataProvider< 
+              ConnectionString = connectionString,
+              DatabaseVendor = Common.DatabaseProviderTypes.SQLITE,
+              ResolutionPath = resolutionPath,
+              IndividualsAmount = 1000,
+              UseOptionTypes = true >
+
+
         
 [<EntryPoint>]
 let main argv = 
+    let ctx = sql.GetDataContext()
+    let xs  = 
+        query{
+            for c in ctx.Main.Gas do 
+                let s = c.GasName.Value
+                yield s
+        } |> Seq.toArray
+
+    printfn "%s" <| String.Join(" ", xs )
+        
+    
+
+
     //let fileName = @"E:\Program Data\Аналитприбор\elchese\elchese.sqlite"
     //let repository_path = @"E:\User\Projects\VS2018\EccCO.v2\App\bin\Release" 
     // @"C:\Users\fpawel\Documents\Visual Studio 2015\Projects\Analit\EccCO.v2\App\bin\Release" 
@@ -206,7 +232,7 @@ let main argv =
     cmd.ExecuteNonQuery() |> ignore
 
     printfn "%A: read exported parties" DateTime.Now
-    cmd.CommandText <- "SELECT old_party_id FROM party;"
+    cmd.CommandText <- "SELECT old_party_id FROM party WHERE old_party_id NOT NULL;"
     use r = cmd.ExecuteReader()    
     let exported_parties =
         seq{
