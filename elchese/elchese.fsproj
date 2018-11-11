@@ -28,7 +28,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartWorkingDirectory>C:\Users\fpawel\Documents\Visual Studio 2015\Projects\Analit\EccCO.v2\App\bin\Release\</StartWorkingDirectory>
+    <StartWorkingDirectory>E:\User\Projects\VS2018\EccCO.v2\App\bin\Release</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -51,13 +51,14 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="utils.fs" />
-    <Compile Include="FSharpBin.fs" />
-    <Compile Include="Range.fs" />
-    <Compile Include="DataModel.fs" />
-    <Compile Include="Var.fs" />
-    <Compile Include="Repository.fs" />
+    <Compile Include="utils\utils.fs" />
+    <Compile Include="utils\FSharpBin.fs" />
+    <Compile Include="utils\Range.fs" />
+    <Compile Include="EccCO.v2\DataModel.fs" />
+    <Compile Include="EccCO.v2\Var.fs" />
+    <Compile Include="EccCO.v2\Repository.fs" />
     <Compile Include="initdb.fs" />
+    <Compile Include="db.fs" />
     <Compile Include="Program.fs" />
     <None Include="Script1.fsx" />
     <None Include="App.config" />
@@ -73,12 +74,17 @@
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.Data.SqlProvider">
-      <HintPath>..\packages\SQLProvider.1.1.52\lib\net451\FSharp.Data.SqlProvider.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.4.5.3\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog.FSharp">
+      <HintPath>..\packages\NLog.FSharp.4.5.3\lib\net40\NLog.FSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
@@ -90,11 +96,16 @@
     <Reference Include="System.Data.SQLite.Linq">
       <HintPath>..\packages\System.Data.SQLite.Linq.1.0.109.0\lib\net46\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.ValueTuple">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.109.1\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.109.1\build\net46\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
