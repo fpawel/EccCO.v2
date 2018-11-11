@@ -188,12 +188,16 @@ let importParties x =
     printfn ""
     printfn "total time: %A" (DateTime.Now - startTime)
 
+let dbNull = box System.DBNull.Value
+
 let readExportProduct (r:SQLiteDataReader) = 
-    let (~%%) (s:string) : 'T option = 
-        if r.[s] = null then None else Some (r.[s] :?> 'T)        
-    let p = old.Product.createNew (r.["place"] :?> int)    
-    p.Serial <- %% "serial"
-    p.ProductType <- %% "product_type_name" |> Option.defaultValue ""
+    let (~%%) (s:string) : decimal option = 
+        if r.[s] = box System.DBNull.Value then None else Some (r.[s] :?> float |> decimal)        
+    let p = old.Product.createNew (r.["place"] :?> int64 |> int)        
+    p.Serial <- 
+        if r.["serial"] = dbNull then None else Some (r.["serial"] :?> int64 |> int)
+    p.ProductType <- 
+        if r.["product_type_name"] = dbNull then "" else r.["product_type_name"] :?> string
     p.If_20 <- %% "i_f_minus20"
     p.Ifon <- %% "i_f_plus20"
     p.If50 <- %% "i_f_plus50"
@@ -207,9 +211,8 @@ let readExportProduct (r:SQLiteDataReader) =
     p.I17 <- %% "i17"
     p.In <- %% "not_measured"
     p.IsReportIncluded <-  r.["production"] :?> bool
-    p.Flash <- r.["flash"] :?> byte[]
-    let n2 = r.["place"] :?> int
-    if p.N <> n2 then failwithf "N=%d != place=%d" p.N n2
+    p.Flash <- 
+        if r.["flash"] = dbNull then [||] else r.["flash"] :?> byte[]    
     p
 
 
@@ -227,24 +230,25 @@ let getExportPartyProducts x party_id =
         else 
             failwithf "%A" p 
         let product_id = r.["product_id"] :?> int64
-            
+        let serial = r.["serial"] :?> int64
+                    
         let cmd = new SQLiteCommand(x.conn)
-        cmd.CommandText <- "UPDATE product SET old_product_id = @old_product_id WHERE product_id = @product_id;"
+        cmd.CommandText <- "UPDATE product SET old_product_id = @old_product_id, old_serial = @old_serial WHERE product_id = @product_id;"
         cmd.AddValue "old_product_id" dbt.String (string(p.Id))
+        cmd.AddValue "old_serial" dbt.Int64 serial
         cmd.AddValue "product_id" dbt.Int64 product_id
         cmd.ExecuteNonQuery() |> ignore
     r.Close()
     products
 
 let readExportParty x (r:SQLiteDataReader)  =    
-    let (~%%) (s:string) : 'T option = 
-        if r.[s] = null then None else Some (r.[s] :?> 'T)
     let p = old.Party.createNew ( r.["created_at"] :?> DateTime )
-    p.Name <- %% "note" |> Option.defaultValue ""
+    p.Name <- 
+        if r.["note"] = dbNull then "" else r.["note"] :?> string
     p.ProductType <- r.["product_type_name"] :?> string
-    p.PGS1 <- r.["concentration1"] :?> decimal
-    p.PGS2 <- r.["concentration2"] :?> decimal
-    p.PGS3 <- r.["concentration3"] :?> decimal
+    p.PGS1 <- r.["concentration1"] :?> float |> decimal
+    p.PGS2 <- r.["concentration2"] :?> float |> decimal
+    p.PGS3 <- r.["concentration3"] :?> float |> decimal
     
     let party_id = r.["party_id"] :?> int64
     p.Products <- 
@@ -253,7 +257,7 @@ let readExportParty x (r:SQLiteDataReader)  =
     p.ProductsSerials <- old.Party.getProductsSerials p.Products
 
     let cmd = new SQLiteCommand(x.conn)
-    cmd.CommandText <- "UPDATE product SET old_party_id = @old_party_id WHERE party_id = @party_id;"
+    cmd.CommandText <- "UPDATE party SET old_party_id = @old_party_id WHERE party_id = @party_id;"
     cmd.AddValue "old_party_id" dbt.String (string(p.Id))
     cmd.AddValue "party_id" dbt.Int64 party_id
     cmd.ExecuteNonQuery() |> ignore
@@ -329,8 +333,6 @@ let syncronize () =
 
     let cmd = new SQLiteCommand(conn)
     cmd.CommandText <- "SELECT * FROM last_party;"
-
-
     conn.Close()
 
     Process.Start(dbPath) |> ignore
