@@ -8,7 +8,7 @@ open System.Data.SQLite
 open System.Data
 open System.Diagnostics
 open System.Data.SqlClient
-open System.Windows.Forms
+
 
 //let fileName = @"E:\Program Data\Аналитприбор\elco\elco.sqlite"
 //let repository_path = @"E:\User\Projects\VS2018\EccCO.v2\App\bin\Release" 
@@ -121,10 +121,7 @@ VALUES (@product_id, @temperature, @current, @k_sens);"""
 let importParty x old_party_id old_party_date = 
 
         let old_party = 
-            match EccCO.v2.Repository.loadParty 
-                env.CurrentDirectory old_party_id old_party_date with
-            | Err err -> failwith err 
-            | Ok x -> x
+            EccCO.v2.Repository.loadParty old_party_id old_party_date
         
         let cmd = new SQLiteCommand(x.conn)
     
@@ -215,8 +212,6 @@ let readExportProduct (r:SQLiteDataReader) =
         if r.["flash"] = dbNull then [||] else r.["flash"] :?> byte[]    
     p
 
-
-
 let getExportPartyProducts x party_id = 
     let products = Array.init 96 (fun n -> old.Product.createNew(n) ) 
     let cmd = new SQLiteCommand(x.conn)
@@ -263,8 +258,17 @@ let readExportParty x (r:SQLiteDataReader)  =
     cmd.ExecuteNonQuery() |> ignore
     p
 
-
+let readOldParties() = 
+    printfn "%A: read old parties" DateTime.Now    
+    let oldParties = 
+        EccCO.v2.Repository.getInfoList ()
+        |> List.sortBy(fun x -> x.Date.Ticks * (-1L))
+    printfn "%A: old parties: %d" DateTime.Now oldParties.Length     
+    oldParties
+    
 let syncronize () = 
+
+    let oldParties = readOldParties()
 
     let appName = "elco"
     
@@ -308,21 +312,7 @@ let syncronize () =
     r.Close()
 
     printfn "imported parties: %d" importedParties.Count    
-
-    printfn "%A: read old parties" DateTime.Now
-
-    do
-        let folderBrowserDialog = new FolderBrowserDialog()
-        if folderBrowserDialog.ShowDialog() <> DialogResult.OK then  
-            failwith "you must browse folder"
-        env.CurrentDirectory <- folderBrowserDialog.SelectedPath
-
-    let oldParties = 
-        EccCO.v2.Repository.getInfoList env.CurrentDirectory
-        |> List.sortBy(fun x -> x.Date.Ticks * (-1L))
-
-    printfn "%A: old parties: %d" DateTime.Now oldParties.Length 
-
+        
     let x = {   
         conn = conn
         importedOldParties = importedParties
@@ -337,7 +327,7 @@ let syncronize () =
     let r = cmd.ExecuteReader()    
     while r.Read() do         
         readExportParty x r        
-        |> EccCO.v2.Repository.save env.CurrentDirectory 
+        |> EccCO.v2.Repository.save 
     r.Close()
 
     let cmd = new SQLiteCommand(conn)

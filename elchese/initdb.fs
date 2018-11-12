@@ -203,7 +203,7 @@ CREATE VIEW IF NOT EXISTS product_info AS
            round(i35, 3)                  AS i35,
            round(i26, 3)                  AS i26,
            round(i17, 3)                  AS i17,
-           firmware NOT NULL              AS firmware,
+           firmware,
 
            k_sens20,
            k_sens50,
