@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS gas
 
 CREATE TABLE IF NOT EXISTS units
 (
-  units_name TEXT PRIMARY KEY,
-  code       INTEGER UNIQUE NOT NULL
+  units_name TEXT PRIMARY KEY NOT NULL,
+  code       INTEGER UNIQUE   NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS product_type
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS product
   i26               REAL,
   i17               REAL,
   not_measured      REAL,
-  flash             BLOB,
+  firmware          BLOB,
   production        BOOLEAN             NOT NULL CHECK (production IN (0, 1)) DEFAULT 0,
 
   old_product_id    TEXT,
@@ -203,7 +203,7 @@ CREATE VIEW IF NOT EXISTS product_info AS
            round(i35, 3)                  AS i35,
            round(i26, 3)                  AS i26,
            round(i17, 3)                  AS i17,
-           flash NOT NULL                 AS firmware,
+           firmware NOT NULL              AS firmware,
 
            k_sens20,
            k_sens50,
@@ -333,5 +333,6 @@ VALUES ('035', '035', 'CO', 'мг/м3', 200, 0.1626, 18, 0, 3, NULL, NULL, NULL,
 DELETE
 FROM party
 WHERE NOT EXISTS(SELECT product_id FROM product WHERE party.party_id = product.party_id);
+
 """
 

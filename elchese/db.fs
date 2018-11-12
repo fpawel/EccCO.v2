@@ -8,6 +8,7 @@ open System.Data.SQLite
 open System.Data
 open System.Diagnostics
 open System.Data.SqlClient
+open System.Windows.Forms
 
 //let fileName = @"E:\Program Data\Аналитприбор\elco\elco.sqlite"
 //let repository_path = @"E:\User\Projects\VS2018\EccCO.v2\App\bin\Release" 
@@ -57,21 +58,20 @@ let importProduct x (party_id:int64) (place:int) (old_product:old.Product) (old_
 
                     i_f_minus20, i_f_plus20, i_f_plus50, i_s_minus20, i_s_plus20, i_s_plus50,
 
-                    flash, production, old_product_id, old_serial)
+                    firmware, production, old_product_id, old_serial)
             VALUES        
                 (@party_id, @serial, @place, @product_type_name,  
                 @i13, @i24, @i35, @i26, @i17, @not_measured, 
                 @i_f_minus20, @i_f_plus20, @i_f_plus50, @i_s_minus20, @i_s_plus20, @i_s_plus50,
-                @flash, @production, @old_product_id, @old_serial);
+                @firmware, @production, @old_product_id, @old_serial);
                 SELECT last_insert_rowid();"""
 
     cmd.Parameters.Add("@party_id", dbt.Int64).Value <- party_id
     if old_party.Products |> List.exists ( fun x -> x.N < old_product.N && x.Serial = Some serial) then
-        cmd.Parameters.Add("@serial", dbt.Object).Value <- null        
+        cmd.AddValue "@serial" dbt.Object null        
     else
-        cmd.Parameters.Add("@serial", dbt.Int32).Value <- serial    
-    cmd.Parameters.Add("@place", dbt.Int64).Value <- place        
-        
+        cmd.AddValue "@serial" dbt.Int32 serial
+    cmd.AddValue "@place" dbt.Int32 place    
     cmd.AddParam dbt.String "@product_type_name" 
         (   if old_product.ProductType = "" then 
                 None 
@@ -93,12 +93,12 @@ let importProduct x (party_id:int64) (place:int) (old_product:old.Product) (old_
         "@i_s_plus50", old_product.Is50 ] |> List.iter(fun (k,v) -> cmd.AddDecimalParam k v)
 
     if old_product.Flash |> Array.exists( (<>) 0xffuy) then 
-        cmd.Parameters.Add("@flash", dbt.Binary, old_product.Flash.Length).Value <- old_product.Flash
-    else 
-        cmd.Parameters.AddWithValue("@flash", null) |> ignore   
-    cmd.Parameters.Add("@production", dbt.Boolean).Value <- old_product.IsReportIncluded
-    cmd.Parameters.Add("@old_product_id", dbt.String).Value <- old_product.Id
-    cmd.Parameters.Add("@old_serial", dbt.Int32).Value <- serial
+        cmd.Parameters.AddWithValue("@firmware", old_product.Flash) |> ignore   
+    else
+        cmd.Parameters.AddWithValue("@firmware", null) |> ignore   
+    cmd.Parameters.AddWithValue("@production", old_product.IsReportIncluded) |> ignore
+    cmd.Parameters.AddWithValue("@old_product_id", old_product.Id) |> ignore
+    cmd.Parameters.AddWithValue("@old_serial", serial) |> ignore
         
     let new_product_id = cmd.ExecuteScalar() :?> int64
 
@@ -281,6 +281,9 @@ let syncronize () =
     printfn "database: %s" fileName  
     if not fileExitst then
         printfn "create sqlite database file"
+        if not <| Directory.Exists dbPath then
+            let x = Directory.CreateDirectory dbPath
+            assert x.Exists
         SQLiteConnection.CreateFile fileName
         
     let conn = new SQLiteConnection( sprintf "Data Source=%s; Version=3;" fileName)
@@ -307,6 +310,12 @@ let syncronize () =
     printfn "imported parties: %d" importedParties.Count    
 
     printfn "%A: read old parties" DateTime.Now
+
+    do
+        let folderBrowserDialog = new FolderBrowserDialog()
+        if folderBrowserDialog.ShowDialog() <> DialogResult.OK then  
+            failwith "you must browse folder"
+        env.CurrentDirectory <- folderBrowserDialog.SelectedPath
 
     let oldParties = 
         EccCO.v2.Repository.getInfoList env.CurrentDirectory
