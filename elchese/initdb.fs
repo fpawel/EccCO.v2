@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS product
 (
   product_id        INTEGER PRIMARY KEY NOT NULL,
   party_id          INTEGER             NOT NULL,
-  serial            INTEGER,
+  serial            INTEGER  CHECK ( serial ISNULL OR serial > 0 ),
   place             INTEGER             NOT NULL CHECK (place >= 0),
   product_type_name TEXT,
   note              TEXT,
@@ -124,19 +124,21 @@ CREATE TRIGGER IF NOT EXISTS trigger_party_updated_at
     UPDATE party SET updated_at = (datetime('now')) WHERE party_id = old.party_id;
   END;
 
-
-CREATE VIEW IF NOT EXISTS party_info AS
-SELECT *,
-       cast(strftime('%Y', created_at) AS INTEGER) AS year,
-       cast(strftime('%m', created_at) AS INTEGER) AS month,
-       cast(strftime('%d', created_at) AS INTEGER) AS day
-FROM party;
-
 CREATE VIEW IF NOT EXISTS last_party AS
 SELECT *
 FROM party
 ORDER BY created_at DESC
 LIMIT 1;
+
+
+CREATE VIEW IF NOT EXISTS party_info AS
+SELECT *,
+       cast(strftime('%Y', DATETIME(created_at, '+3 hours')) AS INTEGER) AS year,
+       cast(strftime('%m', DATETIME(created_at, '+3 hours')) AS INTEGER) AS month,
+       cast(strftime('%d', DATETIME(created_at, '+3 hours')) AS INTEGER) AS day,
+       party_id IN (SELECT party_id FROM last_party) AS last
+FROM party;
+
 
 
 CREATE VIEW IF NOT EXISTS product_info AS
@@ -174,8 +176,8 @@ CREATE VIEW IF NOT EXISTS product_info AS
            place,
            serial,
            product.old_product_id,
-           q1.product_type_name,
-           product.product_type_name      AS self_product_type_name,
+           q1.product_type_name AS applied_product_type_name ,
+           product.product_type_name      AS product_type_name,
            product.note,
            gas_name,
            units_name,
@@ -203,7 +205,6 @@ CREATE VIEW IF NOT EXISTS product_info AS
            round(i35, 3)                  AS i35,
            round(i26, 3)                  AS i26,
            round(i17, 3)                  AS i17,
-           firmware,
 
            k_sens20,
            k_sens50,
@@ -219,7 +220,8 @@ CREATE VIEW IF NOT EXISTS product_info AS
            ok_d_not_measured,
 
            production,
-           not_ok
+           not_ok,
+           (firmware NOT NULL AND LENGTH(firmware) > 0) as has_firmware
 
     FROM q1
            INNER JOIN product_type ON product_type.product_type_name = q1.product_type_name
